@@ -134,8 +134,7 @@ export default function TransporterDashboard() {
               <p className="text-xs text-gray-500">Automated freight dispatch matched to your route and vehicle capacity</p>
             </div>
           </div>
-          
-          {transporterJob.status === "AVAILABLE" ? (
+          {transporterJob.status === "AVAILABLE" && order?.deliveryMethod === "CONSOLIDATED" ? (
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
               <div className="p-6 bg-gradient-to-r from-slate-900 to-emerald-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -250,13 +249,8 @@ export default function TransporterDashboard() {
             </div>
           </div>
           
-          {dedicatedRequests.filter(r => r.status === 'PENDING').length === 0 ? (
-            <div className="p-8 text-center bg-white rounded-2xl border border-gray-200">
-              <p className="text-gray-500 text-sm">No pending dedicated transport requests at the moment.</p>
-            </div>
-          ) : (
-            dedicatedRequests.filter(r => r.status === 'PENDING').map(req => (
-              <div key={req.id} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow mb-4">
+          {transporterJob.status === "AVAILABLE" && order?.deliveryMethod === "IMMEDIATE" ? (
+              <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow mb-4">
                 <div className="p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
@@ -267,16 +261,17 @@ export default function TransporterDashboard() {
                         Direct Farm Route
                       </span>
                     </div>
-                    <h3 className="text-xl font-extrabold mt-1">
-                      {req.route}
+                    <h3 className="text-xl font-extrabold mt-1 flex items-center gap-2">
+                      {order.pickupLocation} → {order.dropLocation} <span className="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">New Live Request</span>
                     </h3>
-                    <p className="text-xs text-gray-300 mt-0.5">
-                      Payload: <strong className="text-white">{req.capacity}</strong> • Requested by: {req.farmerName}
+                    <p className="text-xs text-gray-300 mt-1 flex flex-col gap-0.5">
+                      <span>Payload: <strong className="text-white">{order.quantity} {order.unit} {order.crop}</strong> • Pick-up: <strong className="text-white text-emerald-300">{order.pickupLocation}</strong></span>
+                      <span>Requested by: {order.farmer}</span>
                     </p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs text-gray-400 block font-semibold">GUARANTEED FREIGHT PAYOUT</span>
-                    <span className="text-2xl font-black text-blue-400">₹{req.estimatedCost.toLocaleString()}</span>
+                    <span className="text-2xl font-black text-blue-400">₹{transporterJob.payout.toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="p-4 bg-white flex justify-end gap-3 border-t border-gray-100">
@@ -288,8 +283,8 @@ export default function TransporterDashboard() {
                   </button>
                   <button
                     onClick={() => {
-                      acceptDedicatedTransport(req.id);
-                      setActiveTab("trips"); // Move to active trips
+                      acceptTransportJob();
+                      setActiveTab("trips");
                     }}
                     className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors flex items-center justify-center gap-2"
                   >
@@ -298,7 +293,10 @@ export default function TransporterDashboard() {
                   </button>
                 </div>
               </div>
-            ))
+          ) : (
+            <div className="p-8 text-center bg-white rounded-2xl border border-gray-200">
+              <p className="text-gray-500 text-sm">No pending dedicated transport requests at the moment.</p>
+            </div>
           )}
         </div>
       )}
@@ -597,14 +595,25 @@ export default function TransporterDashboard() {
                         ) : (
                           <div className="space-y-2">
                             {trip.farmers.map(f => (
-                              <div key={f.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
+                              <div key={f.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden">
+                                {f.id.startsWith("MOCK-") || f.id === "MY-ID" ? (
+                                  <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg animate-pulse">
+                                    JUST JOINED
+                                  </div>
+                                ) : null}
+                                <div className="flex items-center gap-3">
+                                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-sm border border-emerald-200">
                                     {f.name.charAt(0)}
                                   </div>
-                                  <span className="font-semibold text-gray-800 text-sm">{f.name}</span>
+                                  <div className="flex flex-col">
+                                    <span className="font-bold text-gray-900 text-sm">{f.name}</span>
+                                    <span className="text-[10px] text-gray-500 flex items-center gap-1"><MapPin size={10} className="text-emerald-400" /> {f.location || "Nearby Farm"}</span>
+                                  </div>
                                 </div>
-                                <span className="font-bold text-gray-900 text-sm">{f.loadAmount} kg</span>
+                                <div className="text-right mt-1 sm:mt-0">
+                                  <span className="font-black text-emerald-800 text-sm bg-emerald-50 px-2 py-0.5 rounded">{f.loadAmount} kg</span>
+                                  <span className="text-[10px] text-gray-500 block mt-0.5">Share: ₹{Math.round((f.loadAmount / trip.totalCapacity) * trip.totalFare)}</span>
+                                </div>
                               </div>
                             ))}
                           </div>

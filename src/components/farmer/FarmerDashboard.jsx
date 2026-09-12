@@ -27,9 +27,17 @@ export default function FarmerDashboard() {
     order, 
     transporterJob, 
     confirmPickupStop,
-    chooseDeliveryMethod,
-    transportPool
+    chooseDeliveryMethod
   } = useEMandi();
+
+  const transportPool = {
+    id: "TP-104",
+    orders: [
+      { pickupStop: "Katol Farm A", farmer: "Your Farm", quantity: 500, crop: "Onions", totalShare: 800 },
+      { pickupStop: "Katol Farm B", farmer: "Ramesh", quantity: 600, crop: "Tomatoes", totalShare: 700 },
+      { pickupStop: "Saoner Farm C", farmer: "Suresh", quantity: 400, crop: "Potatoes", totalShare: 500 }
+    ]
+  };
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCrop, setNewCrop] = useState("Potato (बटाटा)");
@@ -297,169 +305,141 @@ export default function FarmerDashboard() {
                 </div>
 
                 {/* TWO DELIVERY OPTIONS SECTION */}
-                {transporterJob.status === "AVAILABLE" && (
-                  <div className="mb-6 bg-white rounded-2xl border border-gray-200 p-6 shadow-xs mt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Select Delivery Method</h3>
-                        <p className="text-xs text-gray-500">Choose dedicated immediate dispatch or pooled shared transport</p>
+                {["ORDER_CONFIRMED", "DELIVERY_SELECTED"].includes(order.status) && (
+                  <div className="mb-6 mt-6">
+                    {!order.deliveryMethod ? (
+                      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="text-lg font-bold text-gray-900">Select Delivery Method</h3>
+                            <p className="text-xs text-gray-500">Choose dedicated immediate dispatch or pooled shared transport</p>
+                          </div>
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Decision Support Active
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          {/* OPTION 1: IMMEDIATE DELIVERY */}
+                          <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between border-gray-200 hover:border-gray-300 bg-white`}>
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                                    <Zap size={18} />
+                                  </div>
+                                  <h4 className="font-extrabold text-base text-gray-900">Option 1: Immediate Delivery</h4>
+                                </div>
+                                <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+                                  Dedicated Vehicle
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-gray-600 mt-2">
+                                Immediate dedicated transport will be arranged. Dispatches within 3-4 hours directly from farm gate to your warehouse.
+                              </p>
+
+                              <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 space-y-1.5 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">Dedicated Transport Cost:</span>
+                                  <span className="font-semibold text-gray-800">₹1,000</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 text-xs font-bold text-gray-800 border-t border-gray-100">
+                                  <span>Delivery Requirement:</span>
+                                  <span>Immediate Dispatch</span>
+                                </div>
+                                <div className="flex justify-between pt-1 border-t border-gray-100 text-sm font-black text-gray-900">
+                                  <span>Payable Transport Share:</span>
+                                  <span className="text-emerald-600">₹750</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => chooseDeliveryMethod("IMMEDIATE")}
+                              className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors bg-gray-100 hover:bg-gray-200 text-gray-800`}
+                            >
+                              Select Immediate Delivery (₹750)
+                            </button>
+                          </div>
+
+                          {/* OPTION 2: CONSOLIDATED DELIVERY (RECOMMENDED) */}
+                          <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between border-emerald-200 bg-emerald-50/20 hover:border-emerald-300`}>
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                                    <Layers size={18} />
+                                  </div>
+                                  <h4 className="font-extrabold text-base text-gray-900">Option 2: Consolidated Delivery</h4>
+                                </div>
+                                <span className="text-xs font-bold px-2 py-0.5 bg-emerald-600 text-white rounded-full flex items-center gap-1">
+                                  <Sparkles size={12} /> RECOMMENDED
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-gray-600 mt-2">
+                                Shares route with compatible farm orders heading to Nagpur Central Yard. Saves money, reduces empty runs.
+                              </p>
+
+                              <div className="mt-4 p-3 bg-white rounded-xl border border-emerald-200 space-y-1.5 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">Transport Pool:</span>
+                                  <span className="font-bold text-emerald-700">#TP-104 (Nagpur Corridor)</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">Matched Orders:</span>
+                                  <span className="font-semibold text-gray-800">3 Orders (Total: 1,500 kg)</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">Vehicle Assigned:</span>
+                                  <span className="font-semibold text-gray-800">Eicher 2.5T Capacity</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">Total Pool Freight:</span>
+                                  <span className="font-semibold text-gray-800">₹2,000 (Split 3 ways)</span>
+                                </div>
+                                <div className="flex justify-between pt-1 border-t border-emerald-100 text-sm font-black text-emerald-800">
+                                  <span>Your Transparent Share:</span>
+                                  <span className="text-emerald-700">₹800 (Saves ₹200 vs Dedicated!)</span>
+                                </div>
+                              </div>
+
+                              {/* Decision Support Badges */}
+                              <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+                                <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Same destination (Nagpur)</span>
+                                <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Nearby Katol route</span>
+                                <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Capacity available (1.5T/2.5T)</span>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => chooseDeliveryMethod("CONSOLIDATED")}
+                              className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors bg-emerald-600 hover:bg-emerald-700 text-white`}
+                            >
+                              Select Consolidated Delivery (₹800)
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Decision Support Active
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {/* OPTION 1: IMMEDIATE DELIVERY */}
-                      <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
-                        order.deliveryMethod === "IMMEDIATE"
-                          ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
-                          : "border-gray-200 hover:border-gray-300 bg-white"
-                      }`}>
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                                <Zap size={18} />
-                              </div>
-                              <h4 className="font-extrabold text-base text-gray-900">Option 1: Immediate Delivery</h4>
-                            </div>
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
-                              Dedicated Vehicle
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-gray-600 mt-2">
-                            Immediate dedicated transport will be arranged. Dispatches within 3-4 hours directly from farm gate to your warehouse.
-                          </p>
-
-                          <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 space-y-1.5 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Dedicated Transport Cost:</span>
-                              <span className="font-semibold text-gray-800">₹1,000</span>
-                            </div>
-                            <div className="flex justify-between items-center py-2 text-xs font-bold text-gray-800 border-t border-gray-100">
-                              <span>Delivery Requirement:</span>
-                              <span>{order.deliveryMethod === "IMMEDIATE" ? "Immediate Dispatch" : "Consolidated Pool"}</span>
-                            </div>
-                            <div className="flex justify-between pt-1 border-t border-gray-100 text-sm font-black text-gray-900">
-                              <span>Payable Transport Share:</span>
-                              <span className="text-emerald-600">₹750</span>
-                            </div>
-                          </div>
+                    ) : (
+                      <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-8 text-center shadow-xs">
+                        <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center border border-emerald-200 shadow-sm mb-4">
+                          <Truck className="text-emerald-600 animate-pulse" size={24} />
                         </div>
-
-                        <button
-                          onClick={() => chooseDeliveryMethod("IMMEDIATE")}
-                          className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
-                            order.deliveryMethod === "IMMEDIATE"
-                              ? "bg-emerald-600 text-white"
-                              : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                          }`}
-                        >
-                          {order.deliveryMethod === "IMMEDIATE" ? "✓ Immediate Delivery Selected" : "Select Immediate Delivery (₹750)"}
-                        </button>
-                      </div>
-
-                      {/* OPTION 2: CONSOLIDATED DELIVERY (RECOMMENDED) */}
-                      <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
-                        order.deliveryMethod === "CONSOLIDATED"
-                          ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
-                          : "border-emerald-200 bg-emerald-50/20 hover:border-emerald-300"
-                      }`}>
-                        <div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                                <Layers size={18} />
-                              </div>
-                              <h4 className="font-extrabold text-base text-gray-900">Option 2: Consolidated Delivery</h4>
-                            </div>
-                            <span className="text-xs font-bold px-2 py-0.5 bg-emerald-600 text-white rounded-full flex items-center gap-1">
-                              <Sparkles size={12} /> RECOMMENDED
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-gray-600 mt-2">
-                            Shares route with compatible farm orders heading to Nagpur Central Yard. Saves money, reduces empty runs.
-                          </p>
-
-                          <div className="mt-4 p-3 bg-white rounded-xl border border-emerald-200 space-y-1.5 text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Transport Pool:</span>
-                              <span className="font-bold text-emerald-700">#TP-104 (Nagpur Corridor)</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Matched Orders:</span>
-                              <span className="font-semibold text-gray-800">3 Orders (Total: 1,500 kg)</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Vehicle Assigned:</span>
-                              <span className="font-semibold text-gray-800">Eicher 2.5T Capacity</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-500">Total Pool Freight:</span>
-                              <span className="font-semibold text-gray-800">₹2,000 (Split 3 ways)</span>
-                            </div>
-                            <div className="flex justify-between pt-1 border-t border-emerald-100 text-sm font-black text-emerald-800">
-                              <span>Your Transparent Share:</span>
-                              <span className="text-emerald-700">₹800 (Saves ₹200 vs Dedicated!)</span>
-                            </div>
-                          </div>
-
-                          {/* Decision Support Badges */}
-                          <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Same destination (Nagpur)</span>
-                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Nearby Katol route</span>
-                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Capacity available (1.5T/2.5T)</span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => chooseDeliveryMethod("CONSOLIDATED")}
-                          className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
-                            order.deliveryMethod === "CONSOLIDATED"
-                              ? "bg-emerald-600 text-white"
-                              : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                          }`}
-                        >
-                          {order.deliveryMethod === "CONSOLIDATED" ? "✓ Consolidated Delivery Active (₹800)" : "Select Consolidated Delivery (₹800)"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* DETAILED TRANSPORT POOL BREAKDOWN (When Consolidated is picked) */}
-                    {order.deliveryMethod === "CONSOLIDATED" && (
-                      <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-gray-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <Truck className="text-emerald-700" size={18} />
-                            <h4 className="font-bold text-sm text-gray-900">Transport Pool #{transportPool.id} — Transparent Cost Split</h4>
-                          </div>
-                          <span className="text-xs text-gray-500 font-medium">Total Load: 1,500 kg / 2,000 kg Capacity</span>
-                        </div>
-
-                        <div className="space-y-2 text-xs">
-                          {transportPool.orders.map((po, idx) => (
-                            <div key={idx} className="p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                              <div>
-                                <span className="font-bold text-gray-900">{po.pickupStop}</span>
-                                <span className="text-gray-500 block text-[11px]">{po.farmer} • {po.quantity} kg {po.crop}</span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[11px] text-gray-400 block">Base Share + Route Adj.</span>
-                                <span className="font-extrabold text-emerald-700">₹{po.totalShare}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <h3 className="text-lg font-bold text-emerald-900 mb-2">Request Sent to Transporter!</h3>
+                        <p className="text-sm text-emerald-700 max-w-md mx-auto">
+                          You selected <strong>{order.deliveryMethod === "IMMEDIATE" ? "Immediate Dedicated" : "Consolidated Pool"}</strong> delivery. 
+                          Waiting for the Transporter to review and accept the job request...
+                        </p>
                       </div>
                     )}
                   </div>
                 )}
 
                 {/* Transporter Details Card */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
+                {!["ORDER_CONFIRMED", "DELIVERY_SELECTED"].includes(order.status) && (
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Truck size={18} className="text-emerald-700" />
@@ -475,7 +455,7 @@ export default function FarmerDashboard() {
                       <span className="text-gray-400 block text-[10px]">FARM PICKUP POINT</span>
                       <span className="font-semibold text-gray-800">{order.pickupLocation}</span>
                       <span className="text-[11px] text-gray-500 block mt-0.5">
-                        Status: {transporterJob.pickupStops[0].pickedUp ? "✅ Picked up from your farm" : "⏳ Transporter arriving"}
+                        Status: {transporterJob?.pickupStops?.[0]?.pickedUp ? "✅ Picked up from your farm" : "⏳ Transporter arriving"}
                       </span>
                     </div>
                     <div>
@@ -487,18 +467,8 @@ export default function FarmerDashboard() {
                     </div>
                   </div>
 
-                  {!transporterJob.pickupStops[0].pickedUp && (
-                    <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
-                      <span className="text-xs text-gray-600">Simulate loading at your farm gate:</span>
-                      <button
-                        onClick={() => confirmPickupStop(1)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer"
-                      >
-                        Confirm Gate Loading
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -657,8 +627,11 @@ export default function FarmerDashboard() {
                       accept="image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          const url = URL.createObjectURL(e.target.files[0]);
-                          setPhotoPreview(url);
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setPhotoPreview(reader.result);
+                          };
+                          reader.readAsDataURL(e.target.files[0]);
                         }
                       }}
                       className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" 

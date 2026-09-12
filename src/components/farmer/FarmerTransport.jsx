@@ -12,7 +12,8 @@ export default function FarmerTransport() {
     cancelSharedTrip, 
     lockSharedTrip,
     dedicatedRequests,
-    requestDedicatedTransport
+    requestDedicatedTransport,
+    order
   } = useEMandi();
 
   const [selectedTrip, setSelectedTrip] = useState(null);
@@ -154,14 +155,14 @@ export default function FarmerTransport() {
                 <h4 className="font-bold text-purple-900 text-sm mb-3">Demo Controls (Simulate other farmers)</h4>
                 <div className="flex flex-wrap gap-2">
                   <button 
-                    onClick={() => addMockFarmerToTrip(trip.id, "Farmer B", 300)}
+                    onClick={() => addMockFarmerToTrip(trip.id, "Farmer B", 300, "Kalmeshwar Farm")}
                     disabled={trip.currentLoad + 300 > trip.totalCapacity}
                     className="bg-white border border-purple-300 text-purple-700 hover:bg-purple-100 px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50 cursor-pointer"
                   >
                     + Add Farmer B (300kg)
                   </button>
                   <button 
-                    onClick={() => addMockFarmerToTrip(trip.id, "Farmer C", 300)}
+                    onClick={() => addMockFarmerToTrip(trip.id, "Farmer C", 300, "Saoner Farm")}
                     disabled={trip.currentLoad + 300 > trip.totalCapacity}
                     className="bg-white border border-purple-300 text-purple-700 hover:bg-purple-100 px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50 cursor-pointer"
                   >
@@ -357,7 +358,7 @@ export default function FarmerTransport() {
             <p className="text-gray-500 text-sm mb-4">Book a dedicated truck. No waiting for shared farmers, immediate pickup.</p>
             <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 mb-4">
               <span className="text-xs text-gray-500 block">Estimated Dedicated Cost</span>
-              <span className="text-xl font-bold text-gray-900">₹3,000+</span>
+              <span className="text-xl font-bold text-gray-900">₹{order ? order.transportCost || 1000 : 3000}</span>
             </div>
           </div>
           {dedicatedRequests.some(r => r.status === 'PENDING') ? (
@@ -370,7 +371,11 @@ export default function FarmerTransport() {
             </button>
           ) : (
             <button 
-              onClick={() => requestDedicatedTransport()}
+              onClick={() => requestDedicatedTransport(
+                order ? `${order.pickupLocation} → ${order.dropLocation}` : "Katol Farm A → Nagpur", 
+                order ? `${order.quantity} ${order.unit} ${order.crop}` : "Up to 3000 kg", 
+                order ? order.transportCost || 1000 : 3000
+              )}
               className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
             >
               Find Dedicated Transport

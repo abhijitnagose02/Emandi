@@ -428,6 +428,17 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   const [mySharedTrip, setMySharedTrip] = useLocalStorageState('emandi_mySharedTrip_v5', null);
   const [dedicatedRequests, setDedicatedRequests] = useLocalStorageState('emandi_dedicatedRequests_v5', []);
   
+  // Auto-cleanup bad mock listings
+  useEffect(() => {
+    setListings(prev => {
+      const valid = prev.filter(l => l.image && (l.image.startsWith('http') || l.image.startsWith('data:')));
+      if (valid.length !== prev.length) {
+        return valid;
+      }
+      return prev;
+    });
+  }, []);
+
   // Transport pool state for consolidation
   const [transportPool, setTransportPool] = useLocalStorageState('emandi_transportPool_v5', {
     id: "TP-104",
@@ -579,6 +590,11 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     addNotification(`New Listing Created: ${newListing.crop} (${newListing.quantity}${newListing.unit})`, "Farmer");
   };
 
+  const deleteListing = (listingId) => {
+    setListings(prev => prev.filter(l => l.id !== listingId));
+    addNotification("Listing removed successfully.", "All");
+  };
+
   // 2. Buyer makes an offer (Buyer sets price X -> Farmer gets next turn to accept or counter)
   const makeOffer = (listingId, offeredPrice, customNote, deliveryPref = "IMMEDIATE", deliveryDeadline = "") => {
     const listing = listings.find(l => l.id === listingId) || listings[0];
@@ -719,6 +735,20 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     };
 
     setOrder(newOrder);
+    
+    // Initialize the transporter job to 'IDLE' so it doesn't prematurely show on TransporterDashboard
+    setTransporterJob({
+      tripId: `TRP-${Math.floor(Math.random() * 90000) + 10000}`,
+      status: "IDLE",
+      payout: 1000,
+      vehicleNumber: "MH 31 CB 1024",
+      pickupStops: [
+        { stopIndex: 1, location: newOrder.pickupLocation, produce: `${newOrder.quantity} ${newOrder.unit} ${newOrder.crop}`, pickedUp: false, time: null }
+      ],
+      finalDrop: newOrder.dropLocation
+    });
+
+    setActiveTab("orders");
     addNotification(`Order Confirmed! ${newOrder.crop} @ ₹${finalPrice}/kg. Select Delivery Method now.`, "All");
   };
 
@@ -800,7 +830,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
         finalDrop: order.dropLocation
       }));
 
-      addNotification("Immediate Delivery requested. Dispatching dedicated transporter request.", "Transporter");
+      addNotification("Immediate Delivery requested. Waiting for transporter to accept.", "Transporter");
     } else {
       // Consolidated
       const share = 800; // Transparent weight share
@@ -821,7 +851,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
         payout: 2000
       }));
 
-      addNotification("Consolidated Transport Pool TP-104 activated (3 compatible orders grouped).", "Transporter");
+      addNotification("Consolidated Transport Pool TP-104 selected. Waiting for transporter.", "Transporter");
     }
   };
 
@@ -946,6 +976,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     const newFarmer = {
       id: "MY-ID",
       name: currentUser.name,
+      location: order ? order.pickupLocation : "Katol Farm A",
       loadAmount: Number(loadAmount)
     };
     
@@ -964,13 +995,13 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     addNotification(`Successfully joined shared trip with ${trip.transporterName}.`, "Farmer");
   };
 
-  const addMockFarmerToTrip = (tripId, mockFarmerName, loadAmount) => {
+  const addMockFarmerToTrip = (tripId, mockFarmerName, loadAmount, location = "Nearby Farm") => {
     setSharedTrips(prev => prev.map(t => {
       if (t.id === tripId) {
         return {
           ...t,
           currentLoad: t.currentLoad + loadAmount,
-          farmers: [...t.farmers, { id: `MOCK-${Date.now()}`, name: mockFarmerName, loadAmount }]
+          farmers: [...t.farmers, { id: `MOCK-${Date.now()}`, name: mockFarmerName, location, loadAmount }]
         };
       }
       return t;
@@ -1088,6 +1119,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
         setUserPreferences,
         listings,
         createListing,
+        deleteListing,
         negotiation,
         makeOffer,
         sendFarmerCounter,

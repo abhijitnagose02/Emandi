@@ -61,7 +61,8 @@ export default function BuyerDashboard() {
     chooseDeliveryMethod, 
     transportPool, 
     transporterJob, 
-    acceptDeliveryByBuyer 
+    acceptDeliveryByBuyer,
+    deleteListing
   } = useEMandi();
 
   // Search & Filter State
