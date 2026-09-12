@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Tractor, Users, Landmark, HeartHandshake, ChevronDown, Check } from './Icons';
+import TutorialModal from './education/TutorialModal';
+import { loginTutorial } from './education/TutorialData';
 
 const LANGUAGES = ["English", "हिन्दी", "मराठी", "తెలుగు", "தமிழ்", "ਪੰਜਾਬੀ", "ಕನ್ನಡ", "ગુજરાતી", "മലയാളം", "অসমীয়া", "ଓଡ଼ିଆ", "বাংলা", "कश्मीरी", "कोकबोरोक", "डोगरी", "नेपाली", "सिंधी",];
 
@@ -57,6 +59,7 @@ export default function LoginPage({ onLogin }) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedState, setSelectedState] = useState(STATES[0]);
   const [selectedRole, setSelectedRole] = useState(null);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const handleSendOtp = (e) => {
     e.preventDefault();
@@ -100,6 +103,18 @@ export default function LoginPage({ onLogin }) {
           <p className="text-text-secondary text-center mt-1 text-sm font-medium">
             Connecting Farmers to Better Markets
           </p>
+        </div>
+
+        {/* Education Module 1: Login Tutorial */}
+        <div className="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center">
+          <h3 className="text-sm font-bold text-emerald-900 mb-1">New to E-Mandi?</h3>
+          <p className="text-xs text-emerald-700 mb-3">Don't know how to login?</p>
+          <button 
+            onClick={() => setShowTutorial(true)}
+            className="text-xs font-bold bg-white text-emerald-700 px-4 py-2 rounded-lg shadow-sm border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+          >
+            Learn How to Login
+          </button>
         </div>
 
         {/* Step 1: Initial Login Form */}
@@ -196,12 +211,12 @@ export default function LoginPage({ onLogin }) {
 
             {/* Phone Number */}
             <div className="mb-6">
-              <label htmlFor="phone" className="block text-sm font-medium text-text-secondary mb-1">
+              <label htmlFor="phone-input" className="block text-sm font-medium text-text-secondary mb-1">
                 Phone Number
               </label>
               <input
                 type="tel"
-                id="phone"
+                id="phone-input"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 maxLength={10}
@@ -213,6 +228,7 @@ export default function LoginPage({ onLogin }) {
 
             {/* Send OTP Button */}
             <button
+              id="login-btn"
               type="submit"
               disabled={!selectedRole || phone.length !== 10}
               className="w-full bg-primary text-white font-bold py-2 px-4 rounded-md hover:bg-primary-dark transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer shadow-sm"
@@ -229,12 +245,12 @@ export default function LoginPage({ onLogin }) {
               Enter the 4-digit OTP sent to +91 {phone}.
             </p>
             <div className="mb-4">
-              <label htmlFor="otp" className="block text-sm font-medium text-text-secondary mb-1">
+              <label htmlFor="otp-input" className="block text-sm font-medium text-text-secondary mb-1">
                 OTP
               </label>
               <input
                 type="text"
-                id="otp"
+                id="otp-input"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.slice(0, 4))}
                 maxLength={4}
@@ -246,6 +262,7 @@ export default function LoginPage({ onLogin }) {
 
             </div>
             <button
+              id="login-btn"
               type="submit"
               className="w-full bg-primary text-white font-bold py-2 px-4 rounded-md hover:bg-primary-dark transition-colors cursor-pointer shadow-sm"
             >
@@ -261,50 +278,22 @@ export default function LoginPage({ onLogin }) {
           </form>
         )}
 
-        {/* Quick Demo Shortcuts */}
-        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-          <p className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider mb-2">
-            ⚡ Quick Demo Auto-Fill
-          </p>
-          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("Farmer");
-                setPhone("9876543210");
-                setOtp("1234");
-                setStep(2);
-              }}
-              className="px-2.5 py-1 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium rounded-md border border-emerald-200 transition-colors cursor-pointer"
-            >
-              👨‍🌾 Farmer
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("Buyer");
-                setPhone("9123456780");
-                setOtp("1234");
-                setStep(2);
-              }}
-              className="px-2.5 py-1 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium rounded-md border border-emerald-200 transition-colors cursor-pointer"
-            >
-              🛒 Buyer
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("Transporter");
-                setPhone("9988776655");
-                setOtp("1234");
-                setStep(2);
-              }}
-              className="px-2.5 py-1 text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium rounded-md border border-emerald-200 transition-colors cursor-pointer"
-            >
-              🚚 Transporter
-            </button>
-          </div>
+        {/* Education Modules Link */}
+        <div className="mt-4 text-center">
+          <button 
+            onClick={() => setShowTutorial(true)}
+            className="mt-2 text-xs font-bold text-emerald-600 hover:text-emerald-700 cursor-pointer"
+          >
+            New to E-Mandi? Learn how it works →
+          </button>
         </div>
+
+        {showTutorial && (
+          <TutorialModal 
+            tutorial={loginTutorial} 
+            onClose={() => setShowTutorial(false)} 
+          />
+        )}
       </div>
     </div>
   );

@@ -299,6 +299,20 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   // Profile overlay state
   const [activeProfile, setActiveProfile] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  
+  // Education & Learning State
+  const [showLearningCenter, setShowLearningCenter] = useState(false);
+  const [completedModules, setCompletedModules] = useState([]);
+
+  const markModuleCompleted = (moduleId) => {
+    setCompletedModules(prev => {
+      if (!prev.includes(moduleId)) {
+        return [...prev, moduleId];
+      }
+      return prev;
+    });
+  };
+
   const [userPreferences, setUserPreferences] = useState({
     language: "English",
     notifications: {
@@ -976,6 +990,10 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
         MOCK_PROFILES,
         showSettings,
         setShowSettings,
+        showLearningCenter,
+        setShowLearningCenter,
+        completedModules,
+        markModuleCompleted,
         userPreferences,
         setUserPreferences,
         listings,

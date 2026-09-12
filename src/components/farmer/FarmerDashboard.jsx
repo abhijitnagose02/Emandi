@@ -5,6 +5,8 @@ import AIWeatherForecast from './AIWeatherForecast';
 import EMandiNetwork from '../profile/EMandiNetwork';
 import { useEMandi } from '../../context/EMandiContext';
 import FarmerDashboardOverview from './FarmerDashboardOverview';
+import GuidedTour from '../education/GuidedTour';
+import HelpButton from '../education/HelpButton';
 import { 
   Tractor, Plus, DollarSign, Package, Clock, MapPin, 
   ArrowRight, CheckCircle2, AlertCircle, MessageSquare, 
@@ -109,6 +111,7 @@ export default function FarmerDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <GuidedTour />
             <button
               onClick={() => setShowCreateModal(true)}
               className="bg-emerald-400 hover:bg-emerald-300 text-gray-900 font-bold px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 text-sm cursor-pointer"
@@ -165,9 +168,12 @@ export default function FarmerDashboard() {
       {activeTab === "listings" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">My Produce Listings</h2>
-              <p className="text-xs text-gray-500">Live harvests available to regional wholesale buyers</p>
+            <div className="flex items-center gap-3">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">My Produce Listings</h2>
+                <p className="text-xs text-gray-500">Live harvests available to regional wholesale buyers</p>
+              </div>
+              <HelpButton tutorialId="farmer_guide" />
             </div>
             <button
               onClick={() => setShowCreateModal(true)}

@@ -8,6 +8,7 @@ import BuyerDashboard from './components/buyer/BuyerDashboard';
 import TransporterDashboard from './components/transporter/TransporterDashboard';
 import ProfileView from './components/profile/ProfileView';
 import MyProfileSettings from './components/profile/MyProfileSettings';
+import LearningCenter from './components/education/LearningCenter';
 
 function MainMarketplaceApp() {
   const { currentUser, activeProfile } = useEMandi();
@@ -33,6 +34,9 @@ function MainMarketplaceApp() {
 
       {/* GLOBAL SETTINGS OVERLAY */}
       <MyProfileSettings />
+
+      {/* GLOBAL LEARNING CENTER OVERLAY */}
+      <LearningCenter />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sparkles, DollarSign, Package, ArrowRight, ShieldCheck, Users } from '../Icons';
 import ForecastChart from '../ForecastChart';
 import AIWeatherForecast from './AIWeatherForecast';
+import HelpButton from '../education/HelpButton';
 
 export default function FarmerDashboardOverview({ setActiveTab, setShowCreateModal }) {
   const [marketTab, setMarketTab] = useState("gainers");
@@ -34,6 +35,7 @@ export default function FarmerDashboardOverview({ setActiveTab, setShowCreateMod
                   <Sparkles size={24} />
                 </div>
                 <h2 className="text-2xl font-extrabold tracking-tight">e-Mandi DSS</h2>
+                <HelpButton tutorialId="ai_features" />
               </div>
               <p className="text-gray-500 italic text-sm mb-4">"India's first Produce Pricing & Logistics Engine"</p>
               <p className="text-gray-700 text-sm max-w-md mb-6 leading-relaxed">
