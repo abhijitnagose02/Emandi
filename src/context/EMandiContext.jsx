@@ -1,26 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const FarmLinkContext = createContext();
+const EMandiContext = createContext();
 
 export const INITIAL_LISTINGS = [
-  {
-    id: "L-101",
-    crop: "Red Onion (लाल कांदा)",
-    variety: "Nashik Red",
-    quantity: 500,
-    unit: "kg",
-    grade: "Grade A",
-    expectedPrice: 28,
-    farmerName: "Suresh Patil",
-    farmerPhone: "9876543210",
-    pickupLocation: "Katol Farm A, Nagpur, Maharashtra",
-    harvestDate: "15 Sep 2026",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80",
-    moisture: "12%",
-    description: "Naturally cured export-quality onions. Firm texture, uniform 55mm+ size.",
-    createdAt: "Today, 08:30 AM"
-  },
   {
     id: "L-102",
     crop: "Sharbati Wheat (गेहूं)",
@@ -120,7 +102,162 @@ export const INITIAL_NEGOTIATION = {
 
 export const INITIAL_ORDER = null;
 
-export function FarmLinkProvider({ children, initialUser, onLogout }) {
+export const INITIAL_SHARED_TRIPS = [
+  {
+    id: "ST-101",
+    transporterName: "Raj Transport",
+    route: "Chandrapur → Nagpur",
+    vehicle: "1 Ton Mini Truck",
+    rating: 4.8,
+    totalCapacity: 1000,
+    currentLoad: 0,
+    totalFare: 3000,
+    departureDate: "15 Sep 2026",
+    departureTime: "5:00 PM",
+    bookingCloses: "15 Sep 2026, 3:30 PM",
+    status: "ACCEPTING", // ACCEPTING, LOCKED, IN_TRANSIT, DELIVERED
+    farmers: [] // { id, name, loadAmount }
+  },
+  {
+    id: "ST-102",
+    transporterName: "Shree Logistics",
+    route: "Chandrapur → Nagpur",
+    vehicle: "2 Ton Eicher",
+    rating: 4.6,
+    totalCapacity: 2000,
+    currentLoad: 800,
+    totalFare: 5500,
+    departureDate: "15 Sep 2026",
+    departureTime: "6:00 PM",
+    bookingCloses: "15 Sep 2026, 4:00 PM",
+    status: "ACCEPTING",
+    farmers: [
+      { id: "F-1", name: "Anil More", loadAmount: 500 },
+      { id: "F-2", name: "Balasaheb", loadAmount: 300 }
+    ]
+  }
+];
+
+export const MOCK_PROFILES = [
+  {
+    id: "P-F1",
+    role: "Farmer",
+    name: "Ramesh Patil",
+    photo: "https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=600&auto=format&fit=crop&q=80",
+    location: "Chandrapur, Maharashtra",
+    isVerified: true,
+    rating: 4.6,
+    reviewsCount: 24,
+    experience: "8 Years",
+    landArea: "3.5 Acres",
+    mainCrops: ["Tomato", "Onion", "Chilli"],
+    farmingType: "Organic Transition",
+    about: "Third-generation farmer focused on sustainable agriculture and direct market supply.",
+    stats: {
+      activeListings: 4,
+      totalOrders: 42,
+      quantitySold: "8,500 KG",
+      totalEarnings: "₹1,85,000",
+      successfulDeliveries: 40
+    },
+    verification: {
+      identity: true,
+      farmDetails: true,
+      productHistory: true,
+      deliveryHistory: true
+    },
+    trustScore: 92,
+    reviews: [
+      { author: "FreshMart", rating: 5, text: "Excellent quality tomatoes, perfectly graded." },
+      { author: "Ramesh Logix", rating: 4, text: "Pickup was smooth, well packed." }
+    ]
+  },
+  {
+    id: "P-B1",
+    role: "Buyer",
+    name: "Neha Sharma",
+    businessName: "FreshMart Retail",
+    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80",
+    location: "Nagpur, Maharashtra",
+    isVerified: true,
+    rating: 4.8,
+    reviewsCount: 56,
+    buyerType: "Retail Buyer",
+    businessType: "Supermarket Chain",
+    productsPurchased: ["Onion", "Potato", "Tomato", "Wheat"],
+    about: "Procurement head for a chain of 5 supermarkets in Nagpur. We source directly from farmers for fresh produce.",
+    stats: {
+      totalOrders: 124,
+      activeOrders: 3,
+      quantityPurchased: "24,000 KG",
+      totalSpending: "₹6,40,000",
+      successfulDeliveries: 120
+    },
+    verification: {
+      business: true,
+      contact: true,
+      purchaseHistory: true,
+      paymentHistory: true
+    },
+    trustScore: 96,
+    reviews: [
+      { author: "Suresh Patil", rating: 5, text: "Very reliable buyer and quick payment." },
+      { author: "Anil More", rating: 5, text: "Clear requirements and fair negotiation." }
+    ],
+    recentPurchases: [
+      { product: "Red Onion", farmer: "Suresh Patil", quantity: "500 KG", price: "₹25/kg", status: "Delivered" },
+      { product: "Tomato", farmer: "Ramesh Patil", quantity: "200 KG", price: "₹22/kg", status: "In Transit" }
+    ]
+  },
+  {
+    id: "P-T1",
+    role: "Transporter",
+    name: "Raj Transport",
+    driverName: "Rajesh Kumar",
+    photo: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600&auto=format&fit=crop&q=80",
+    location: "Chandrapur, Maharashtra",
+    isVerified: true,
+    rating: 4.7,
+    reviewsCount: 89,
+    experience: "6 Years",
+    fleetSize: "5 Vehicles",
+    vehicleTypes: ["Tata 407", "17ft Truck", "Mini Truck"],
+    about: "Specialized in agricultural transport across Vidarbha region. Reliable and on-time delivery.",
+    stats: {
+      totalTrips: 342,
+      activeTrips: 2,
+      completedDeliveries: 338,
+      capacityDelivered: "540 Tons",
+      onTimeDelivery: "98%",
+      farmersServed: 120
+    },
+    verification: {
+      identity: true,
+      vehicle: true,
+      routeHistory: true,
+      deliveryHistory: true
+    },
+    trustScore: 94,
+    reviews: [
+      { author: "Neha Sharma", rating: 5, text: "Good transporter, delivered the produce on time." },
+      { author: "Baldev Singh", rating: 4, text: "Careful with the produce during loading." }
+    ],
+    availableTrips: [
+      { 
+        route: "CHANDRAPUR → NAGPUR",
+        departure: "5:00 PM",
+        bookingCloses: "3:30 PM",
+        vehicle: "1000 KG Truck",
+        availableCapacity: 400,
+        currentFarmers: 2,
+        estimatedFare: 3000,
+        status: "Accepting Farmers"
+      }
+    ]
+  }
+];
+
+export function EMandiProvider({ children, initialUser, onLogout }) {
   const getDefaultName = (role) => {
     if (role === 'Farmer') return 'Suresh Patil';
     if (role === 'Buyer') return 'FreshDirect Procurement';
@@ -153,10 +290,39 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
     };
   });
 
-  const [activeTab, setActiveTab] = useState("dashboard"); // dashboard, marketplace, listings, negotiations, orders, transport, settlement, profile
+  const [activeTab, setActiveTab] = useState(() => {
+    if (initialUser?.role === 'Buyer') return 'dashboard';
+    if (initialUser?.role === 'Transporter') return 'requests';
+    return 'dashboard';
+  });
+  
+  // Profile overlay state
+  const [activeProfile, setActiveProfile] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [userPreferences, setUserPreferences] = useState({
+    language: "English",
+    notifications: {
+      orderUpdates: true,
+      paymentUpdates: true,
+      newRequests: true,
+      transportUpdates: true,
+      marketAlerts: true,
+      promotions: false
+    },
+    privacy: {
+      profileVisibility: "Public",
+      showMobile: false,
+      showEmail: false,
+      showLocation: true
+    }
+  });
+
   const [listings, setListings] = useState(INITIAL_LISTINGS);
   const [negotiation, setNegotiation] = useState(INITIAL_NEGOTIATION);
   const [order, setOrder] = useState(null);
+  const [sharedTrips, setSharedTrips] = useState(INITIAL_SHARED_TRIPS);
+  const [mySharedTrip, setMySharedTrip] = useState(null);
+  const [dedicatedRequests, setDedicatedRequests] = useState([]);
   
   // Transport pool state for consolidation
   const [transportPool, setTransportPool] = useState({
@@ -236,6 +402,9 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
               initialUser.role === 'Buyer' ? 'FreshDirect (Rajesh K.)' :
               initialUser.role === 'Transporter' ? 'Ramesh Transports' : 'Samarth NGO'
       }));
+      if (initialUser.role === 'Buyer') setActiveTab('dashboard');
+      else if (initialUser.role === 'Transporter') setActiveTab('requests');
+      else setActiveTab('dashboard');
     }
   }, [initialUser]);
 
@@ -277,7 +446,7 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
       }
     };
     setCurrentUser(roleProfiles[newRole] || roleProfiles.Farmer);
-    if (newRole === 'Buyer') setActiveTab('negotiations');
+    if (newRole === 'Buyer') setActiveTab('dashboard');
     else if (newRole === 'Transporter') setActiveTab('requests');
     else setActiveTab('dashboard');
   };
@@ -307,7 +476,7 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
   };
 
   // 2. Buyer makes an offer (Buyer sets price X -> Farmer gets next turn to accept or counter)
-  const makeOffer = (listingId, offeredPrice, customNote, deliveryPref = "IMMEDIATE") => {
+  const makeOffer = (listingId, offeredPrice, customNote, deliveryPref = "IMMEDIATE", deliveryDeadline = "") => {
     const listing = listings.find(l => l.id === listingId) || listings[0];
     const newNeg = {
       id: `NEG-${Math.floor(100 + Math.random() * 900)}`,
@@ -323,6 +492,7 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
       currentOffer: Number(offeredPrice),
       lastOfferBy: "buyer", // Buyer made the offer -> Farmer decides next
       deliveryPreference: deliveryPref,
+      deliveryDeadline: deliveryDeadline,
       status: "IN_PROGRESS",
       history: [
         { 
@@ -654,7 +824,7 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
   const addNotification = (message, targetRole) => {
     const newNotif = {
       id: Date.now(),
-      title: "FarmLink Update",
+      title: "e-Mandi Update",
       message,
       time: "Just now",
       read: false,
@@ -663,14 +833,151 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
     setNotifications(prev => [newNotif, ...prev.slice(0, 9)]);
   };
 
+  // --- Shared Transport Actions ---
+
+  const joinSharedTrip = (tripId, loadAmount) => {
+    const trip = sharedTrips.find(t => t.id === tripId);
+    if (!trip) return;
+    
+    const newFarmer = {
+      id: "MY-ID",
+      name: currentUser.name,
+      loadAmount: Number(loadAmount)
+    };
+    
+    setSharedTrips(prev => prev.map(t => {
+      if (t.id === tripId) {
+        return {
+          ...t,
+          currentLoad: t.currentLoad + newFarmer.loadAmount,
+          farmers: [...t.farmers, newFarmer]
+        };
+      }
+      return t;
+    }));
+    
+    setMySharedTrip({ tripId, myLoad: Number(loadAmount) });
+    addNotification(`Successfully joined shared trip with ${trip.transporterName}.`, "Farmer");
+  };
+
+  const addMockFarmerToTrip = (tripId, mockFarmerName, loadAmount) => {
+    setSharedTrips(prev => prev.map(t => {
+      if (t.id === tripId) {
+        return {
+          ...t,
+          currentLoad: t.currentLoad + loadAmount,
+          farmers: [...t.farmers, { id: `MOCK-${Date.now()}`, name: mockFarmerName, loadAmount }]
+        };
+      }
+      return t;
+    }));
+  };
+
+  const removeMockFarmerFromTrip = (tripId, mockFarmerId) => {
+    setSharedTrips(prev => prev.map(t => {
+      if (t.id === tripId) {
+        const farmerRecord = t.farmers.find(f => f.id === mockFarmerId);
+        const loadToDeduct = farmerRecord ? farmerRecord.loadAmount : 0;
+        return {
+          ...t,
+          currentLoad: t.currentLoad - loadToDeduct,
+          farmers: t.farmers.filter(f => f.id !== mockFarmerId)
+        };
+      }
+      return t;
+    }));
+    addNotification("A farmer cancelled their booking. Shared trip updated.", "Farmer");
+  };
+
+  const cancelSharedTrip = (tripId, fineAmount = 0) => {
+    setSharedTrips(prev => prev.map(t => {
+      if (t.id === tripId) {
+        const myFarmerRecord = t.farmers.find(f => f.id === "MY-ID");
+        const loadToDeduct = myFarmerRecord ? myFarmerRecord.loadAmount : 0;
+        return {
+          ...t,
+          currentLoad: t.currentLoad - loadToDeduct,
+          farmers: t.farmers.filter(f => f.id !== "MY-ID")
+        };
+      }
+      return t;
+    }));
+    setMySharedTrip(null);
+    if (fineAmount > 0) {
+      addNotification(`Trip cancelled. ₹${fineAmount} cancellation fee applied.`, "Farmer");
+    } else {
+      addNotification(`Trip cancelled successfully.`, "Farmer");
+    }
+  };
+
+  const lockSharedTrip = (tripId) => {
+    setSharedTrips(prev => prev.map(t => {
+      if (t.id === tripId) {
+        return { ...t, status: "LOCKED" };
+      }
+      return t;
+    }));
+    addNotification("Booking closed. Trip finalized and price locked.", "All");
+  };
+
+  const requestDedicatedTransport = (route = "Katol Farm A → Nagpur", load = "Up to 3000 kg", estimatedCost = 3000) => {
+    const newRequest = {
+      id: `DREQ-${Date.now()}`,
+      farmerName: currentUser.name || "Farmer",
+      route: route,
+      capacity: load,
+      estimatedCost: estimatedCost,
+      status: "PENDING"
+    };
+    setDedicatedRequests(prev => [newRequest, ...prev]);
+    addNotification(`New dedicated transport request from ${currentUser.name || "Farmer"}`, "Transporter");
+  };
+
+  const acceptDedicatedTransport = (requestId) => {
+    setDedicatedRequests(prev => prev.map(req => {
+      if (req.id === requestId) return { ...req, status: "ACCEPTED" };
+      return req;
+    }));
+    addNotification(`Transporter accepted your dedicated transport request!`, "Farmer");
+  };
+
+  const createTransporterTrip = (tripData) => {
+    const newTrip = {
+      id: `ST-${Date.now()}`,
+      transporterName: currentUser.name,
+      route: tripData.route,
+      vehicle: tripData.vehicle,
+      rating: 5.0,
+      totalCapacity: tripData.capacity,
+      currentLoad: 0,
+      totalFare: tripData.platformFare,
+      departureDate: tripData.departureDate,
+      departureTime: tripData.departureTime,
+      bookingCloses: tripData.bookingCloses,
+      status: "ACCEPTING",
+      farmers: []
+    };
+    setSharedTrips(prev => [newTrip, ...prev]);
+    setActiveTab("trips");
+    addNotification(`New trip published for ${tripData.departureDate}. Accepting farmers.`, "Transporter");
+  };
+
+
   return (
-    <FarmLinkContext.Provider
+    <EMandiContext.Provider
       value={{
         currentUser,
         setCurrentUser,
         switchRole,
         activeTab,
         setActiveTab,
+        activeProfile,
+        setActiveProfile,
+        MOCK_PROFILES,
+        showSettings,
+        setShowSettings,
+        userPreferences,
+        setUserPreferences,
         listings,
         createListing,
         negotiation,
@@ -689,19 +996,30 @@ export function FarmLinkProvider({ children, initialUser, onLogout }) {
         confirmDeliveryAtDrop,
         acceptDeliveryByBuyer,
         notifications,
+        sharedTrips,
+        mySharedTrip,
+        joinSharedTrip,
+        addMockFarmerToTrip,
+        removeMockFarmerFromTrip,
+        cancelSharedTrip,
+        lockSharedTrip,
+        createTransporterTrip,
+        dedicatedRequests,
+        requestDedicatedTransport,
+        acceptDedicatedTransport,
         resetDemo,
         onLogout
       }}
     >
       {children}
-    </FarmLinkContext.Provider>
+    </EMandiContext.Provider>
   );
 }
 
-export function useFarmLink() {
-  const context = useContext(FarmLinkContext);
+export function useEMandi() {
+  const context = useContext(EMandiContext);
   if (!context) {
-    throw new Error("useFarmLink must be used within a FarmLinkProvider");
+    throw new Error("useEMandi must be used within a EMandiProvider");
   }
   return context;
 }

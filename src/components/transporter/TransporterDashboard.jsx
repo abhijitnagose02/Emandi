@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useFarmLink } from '../../context/FarmLinkContext';
+import { useEMandi } from '../../context/EMandiContext';
+import EMandiNetwork from '../profile/EMandiNetwork';
 import { 
   Truck, Package, MapPin, Clock, DollarSign, CheckCircle2, 
-  AlertCircle, ArrowRight, ShieldCheck, Sparkles, Layers, Zap
+  AlertCircle, ArrowRight, ShieldCheck, Sparkles, Layers, Zap, Users, Plus
 } from '../Icons';
 
 export default function TransporterDashboard() {
@@ -10,14 +11,29 @@ export default function TransporterDashboard() {
     currentUser, 
     activeTab, 
     setActiveTab, 
+    activeProfile,
+    setActiveProfile,
     transporterJob, 
     acceptTransportJob, 
     confirmPickupStop, 
     confirmDeliveryAtDrop, 
-    order 
-  } = useFarmLink();
+    order,
+    sharedTrips,
+    createTransporterTrip,
+    dedicatedRequests,
+    acceptDedicatedTransport
+  } = useEMandi();
 
   const [mockProofUploaded, setMockProofUploaded] = useState(false);
+  const [newTripForm, setNewTripForm] = useState({
+    route: "Chandrapur → Nagpur",
+    vehicle: "Eicher Pro 2.5 Ton",
+    capacity: 2000,
+    departureDate: "16 Sep 2026",
+    departureTime: "7:00 AM",
+    bookingCloses: "15 Sep 2026, 9:00 PM",
+    platformFare: 4500
+  });
 
   const completedStops = transporterJob.pickupStops.filter(s => s.pickedUp).length;
   const totalStops = transporterJob.pickupStops.length;
@@ -73,6 +89,40 @@ export default function TransporterDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Tab Navigation within Banner */}
+        <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+          <button 
+            onClick={() => setActiveTab("requests")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${activeTab === "requests" ? "bg-white text-emerald-900" : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/60"}`}
+          >
+            Broker Requests
+          </button>
+          <button 
+            onClick={() => setActiveTab("dedicated_requests")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === "dedicated_requests" ? "bg-white text-emerald-900" : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/60"}`}
+          >
+            Dedicated Requests
+          </button>
+          <button 
+            onClick={() => setActiveTab("trips")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${activeTab === "trips" ? "bg-white text-emerald-900" : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/60"}`}
+          >
+            Active Trips
+          </button>
+          <button 
+            onClick={() => setActiveTab("shared")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors flex items-center gap-2 ${activeTab === "shared" ? "bg-white text-emerald-900" : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/60"}`}
+          >
+            <Users size={16} /> Shared Trips <span className="bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">NEW</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab("settlement")}
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors ${activeTab === "settlement" ? "bg-white text-emerald-900" : "bg-emerald-800/60 text-emerald-100 hover:bg-emerald-700/60"}`}
+          >
+            Settlements
+          </button>
+        </div>
       </div>
 
       {/* OPEN REQUESTS TAB */}
@@ -84,7 +134,7 @@ export default function TransporterDashboard() {
               <p className="text-xs text-gray-500">Automated freight dispatch matched to your route and vehicle capacity</p>
             </div>
           </div>
-
+          
           {transporterJob.status === "AVAILABLE" ? (
             <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
               <div className="p-6 bg-gradient-to-r from-slate-900 to-emerald-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -190,6 +240,69 @@ export default function TransporterDashboard() {
         </div>
       )}
 
+      {/* DEDICATED REQUESTS TAB */}
+      {activeTab === "dedicated_requests" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Direct Farmer Dedicated Requests</h2>
+              <p className="text-xs text-gray-500">Immediate dispatch requests directly from farmers needing dedicated vehicles</p>
+            </div>
+          </div>
+          
+          {dedicatedRequests.filter(r => r.status === 'PENDING').length === 0 ? (
+            <div className="p-8 text-center bg-white rounded-2xl border border-gray-200">
+              <p className="text-gray-500 text-sm">No pending dedicated transport requests at the moment.</p>
+            </div>
+          ) : (
+            dedicatedRequests.filter(r => r.status === 'PENDING').map(req => (
+              <div key={req.id} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow mb-4">
+                <div className="p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/30">
+                        DEDICATED REQUEST
+                      </span>
+                      <span className="text-xs font-bold bg-blue-400 text-gray-900 px-2 py-0.5 rounded-full">
+                        Direct Farm Route
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-extrabold mt-1">
+                      {req.route}
+                    </h3>
+                    <p className="text-xs text-gray-300 mt-0.5">
+                      Payload: <strong className="text-white">{req.capacity}</strong> • Requested by: {req.farmerName}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-gray-400 block font-semibold">GUARANTEED FREIGHT PAYOUT</span>
+                    <span className="text-2xl font-black text-blue-400">₹{req.estimatedCost.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="p-4 bg-white flex justify-end gap-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    className="px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-50 cursor-pointer"
+                  >
+                    Decline
+                  </button>
+                  <button
+                    onClick={() => {
+                      acceptDedicatedTransport(req.id);
+                      setActiveTab("trips"); // Move to active trips
+                    }}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Accept Dedicated Trip</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {/* ACTIVE TRIPS TAB (MULTI-STOP LOGISTICS) */}
       {activeTab === "trips" && (
         <div className="space-y-6">
@@ -221,53 +334,81 @@ export default function TransporterDashboard() {
               </div>
             </div>
 
-            {/* STOPS MANAGEMENT LIST */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-base text-gray-900">Farm Gate Loading Sequence</h3>
-              {transporterJob.pickupStops.map((stop) => (
-                <div 
-                  key={stop.stopIndex} 
-                  className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                    stop.pickedUp ? "bg-emerald-50/60 border-emerald-200" : "bg-white border-gray-200"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                      stop.pickedUp ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800"
-                    }`}>
-                      {stop.pickedUp ? "✓" : stop.stopIndex}
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-sm">
-                        Stop {stop.stopIndex}: {stop.location}
+            {/* STOPS MANAGEMENT & LIVE MAP */}
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="lg:w-2/3 space-y-3">
+                <h3 className="font-bold text-base text-gray-900">Farm Gate Loading Sequence</h3>
+                {transporterJob.pickupStops.map((stop) => (
+                  <div 
+                    key={stop.stopIndex} 
+                    className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      stop.pickedUp ? "bg-emerald-50/60 border-emerald-200" : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                        stop.pickedUp ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800"
+                      }`}>
+                        {stop.pickedUp ? "✓" : stop.stopIndex}
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Cargo: <strong className="text-gray-800">{stop.produce}</strong>
-                      </p>
-                      {stop.pickedUp && (
-                        <span className="text-[11px] text-emerald-700 font-medium">
-                          ✓ Verified & loaded onto truck • Weight receipt logged
+                      <div>
+                        <div className="font-bold text-gray-900 text-sm">
+                          Stop {stop.stopIndex}: {stop.location}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Cargo: <strong className="text-gray-800">{stop.produce}</strong>
+                        </p>
+                        {stop.pickedUp && (
+                          <span className="text-[11px] text-emerald-700 font-medium">
+                            ✓ Verified & loaded onto truck • Weight receipt logged
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      {!stop.pickedUp ? (
+                        <button
+                          onClick={() => confirmPickupStop(stop.stopIndex)}
+                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-xs transition-colors whitespace-nowrap"
+                        >
+                          Confirm Farm Pickup
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                          Loaded
                         </span>
                       )}
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div>
-                    {!stop.pickedUp ? (
-                      <button
-                        onClick={() => confirmPickupStop(stop.stopIndex)}
-                        className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl cursor-pointer shadow-xs transition-colors whitespace-nowrap"
-                      >
-                        Confirm Farm Pickup
-                      </button>
-                    ) : (
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
-                        Loaded
-                      </span>
-                    )}
+              {/* LIVE MAP */}
+              <div className="lg:w-1/3 flex flex-col">
+                <h3 className="font-bold text-base text-gray-900 mb-3">Live Navigation Route</h3>
+                <div className="flex-1 rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[300px]">
+                  <img src="/route_map.jpg" alt="Live Route Map" className="w-full h-full object-cover absolute inset-0" />
+                  <div className="absolute top-2 left-2 right-2 flex justify-between gap-2 pointer-events-none">
+                     <span className="bg-emerald-600/90 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                       <Sparkles size={12}/> Route Optimized
+                     </span>
+                     <span className="bg-black/70 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                       GPS Active
+                     </span>
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-sm p-3 rounded-xl border border-gray-200 shadow-lg flex flex-col gap-1">
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-900">
+                      <span className="flex items-center gap-1.5"><MapPin size={14} className="text-emerald-600"/> Next: Nagpur Yard</span>
+                      <span className="text-emerald-700">12 km</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-gray-500 font-medium mt-1">
+                      <span>ETA: 45 mins</span>
+                      <span>Traffic: Light</span>
+                    </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
             {/* CAPACITY & POOLING - WAITING PLAN */}
             {transporterJob.status !== "COMPLETED" && transporterJob.status !== "DELIVERED" && (
@@ -354,6 +495,130 @@ export default function TransporterDashboard() {
         </div>
       )}
 
+      {/* SHARED TRIPS TAB */}
+      {activeTab === "shared" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-end">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Shared Transport Hub</h2>
+              <p className="text-xs text-gray-500">Publish open trips on the marketplace and let farmers book available space.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Plus size={18} className="text-emerald-600" /> Publish New Trip
+                </h3>
+                
+                <div className="space-y-4 text-sm">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">Route</label>
+                    <input type="text" value={newTripForm.route} onChange={e => setNewTripForm({...newTripForm, route: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">Departure Date</label>
+                      <input type="text" value={newTripForm.departureDate} onChange={e => setNewTripForm({...newTripForm, departureDate: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1">Departure Time</label>
+                      <input type="text" value={newTripForm.departureTime} onChange={e => setNewTripForm({...newTripForm, departureTime: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">Booking Deadline</label>
+                    <input type="text" value={newTripForm.bookingCloses} onChange={e => setNewTripForm({...newTripForm, bookingCloses: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+
+                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl mt-4">
+                    <span className="text-xs text-emerald-800 font-bold flex justify-between items-center mb-1">
+                      Platform Calculated Fare
+                      <ShieldCheck size={14} className="text-emerald-600" />
+                    </span>
+                    <div className="text-2xl font-black text-emerald-900">₹{newTripForm.platformFare}</div>
+                    <p className="text-[10px] text-emerald-700 mt-1">Based on base fare, distance, and standard loading/unloading rates. This is locked to ensure fairness.</p>
+                  </div>
+
+                  <button 
+                    onClick={() => createTransporterTrip(newTripForm)}
+                    className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-sm transition-colors cursor-pointer"
+                  >
+                    Publish Trip
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="font-bold text-gray-900 text-lg">Your Published Trips</h3>
+              {sharedTrips.filter(t => t.transporterName === currentUser.name).length === 0 ? (
+                <div className="bg-gray-50 rounded-2xl border border-gray-200 p-8 text-center text-gray-500 text-sm">
+                  No shared trips published yet. Use the form to create one.
+                </div>
+              ) : (
+                sharedTrips.filter(t => t.transporterName === currentUser.name).map(trip => {
+                  const capacityPercent = Math.round((trip.currentLoad / trip.totalCapacity) * 100);
+                  
+                  return (
+                    <div key={trip.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                      <div className="p-5 border-b border-gray-100 flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${trip.status === "LOCKED" ? "bg-blue-100 text-blue-800" : "bg-emerald-100 text-emerald-800"}`}>
+                              {trip.status === "LOCKED" ? "🔒 Locked & Confirmed" : "Accepting Farmers"}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-lg text-gray-900">{trip.route}</h4>
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-4">
+                            <span className="flex items-center gap-1"><Clock size={14}/> {trip.departureDate}, {trip.departureTime}</span>
+                            <span className="flex items-center gap-1"><Truck size={14}/> {trip.vehicle} ({trip.totalCapacity}kg)</span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs text-gray-500 block font-semibold">Total Fare</span>
+                          <span className="text-xl font-black text-emerald-700">₹{trip.totalFare}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="p-5 bg-gray-50">
+                        <div className="flex justify-between items-end mb-2">
+                          <span className="text-sm font-bold text-gray-700">Capacity Utilization</span>
+                          <span className="text-sm font-bold text-gray-900">{trip.currentLoad} / {trip.totalCapacity} kg</span>
+                        </div>
+                        <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden mb-6">
+                          <div className="bg-emerald-500 h-full" style={{width: `${capacityPercent}%`}}></div>
+                        </div>
+
+                        <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Joined Farmers ({trip.farmers.length})</h5>
+                        {trip.farmers.length === 0 ? (
+                          <div className="text-sm text-gray-500 italic py-2">Waiting for farmers to join...</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {trip.farmers.map(f => (
+                              <div key={f.id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">
+                                    {f.name.charAt(0)}
+                                  </div>
+                                  <span className="font-semibold text-gray-800 text-sm">{f.name}</span>
+                                </div>
+                                <span className="font-bold text-gray-900 text-sm">{f.loadAmount} kg</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* EARNINGS & SETTLEMENT TAB */}
       {activeTab === "settlement" && (
         <div className="space-y-4">
@@ -393,6 +658,11 @@ export default function TransporterDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* NETWORK / DIRECTORY TAB */}
+      {activeTab === "network" && (
+        <EMandiNetwork />
       )}
     </div>
   );

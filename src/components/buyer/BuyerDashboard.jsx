@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import LiveNegotiationChat from '../LiveNegotiationChat';
-import ForecastChart from '../ForecastChart';
-import { useFarmLink } from '../../context/FarmLinkContext';
+import BuyerDashboardOverview from './BuyerDashboardOverview';
+import EMandiNetwork from '../profile/EMandiNetwork';
+import { useEMandi } from '../../context/EMandiContext';
 import { 
   Users, Search, Filter, MapPin, DollarSign, Package, 
   Clock, ArrowRight, CheckCircle2, AlertCircle, MessageSquare, 
@@ -13,6 +14,7 @@ export default function BuyerDashboard() {
     currentUser, 
     activeTab, 
     setActiveTab, 
+    activeProfile,
     listings, 
     negotiation, 
     makeOffer, 
@@ -23,7 +25,7 @@ export default function BuyerDashboard() {
     transportPool, 
     transporterJob, 
     acceptDeliveryByBuyer 
-  } = useFarmLink();
+  } = useEMandi();
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,8 +35,9 @@ export default function BuyerDashboard() {
   // Modal for Listing Detail / Make Offer
   const [selectedListing, setSelectedListing] = useState(null);
   const [offerPriceInput, setOfferPriceInput] = useState("24");
-  const [offerNoteInput, setOfferNoteInput] = useState("We can take the entire 500kg lot. Immediate dispatch preferred.");
+  const [offerNoteInput, setOfferNoteInput] = useState("We can take the entire lot. Immediate dispatch preferred.");
   const [offerDeliveryPref, setOfferDeliveryPref] = useState("IMMEDIATE"); // "IMMEDIATE" or "POOL"
+  const [offerDeliveryDeadline, setOfferDeliveryDeadline] = useState("");
 
   // Negotiation timeline counter input
   const [buyerCounterInput, setBuyerCounterInput] = useState("25");
@@ -52,7 +55,7 @@ export default function BuyerDashboard() {
   const handleMakeOfferSubmit = (e) => {
     e.preventDefault();
     if (!selectedListing || !offerPriceInput) return;
-    makeOffer(selectedListing.id, Number(offerPriceInput), offerNoteInput, offerDeliveryPref);
+    makeOffer(selectedListing.id, Number(offerPriceInput), offerNoteInput, offerDeliveryPref, offerDeliveryDeadline);
     setSelectedListing(null);
     setActiveTab("negotiations");
   };
@@ -66,6 +69,7 @@ export default function BuyerDashboard() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
+      {activeTab === 'marketplace' && (
       <div className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -118,11 +122,16 @@ export default function BuyerDashboard() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* DASHBOARD OVERVIEW TAB */}
+      {activeTab === "dashboard" && (
+        <BuyerDashboardOverview setActiveTab={setActiveTab} />
+      )}
 
       {/* MARKETPLACE TAB */}
       {activeTab === "marketplace" && (
         <div className="space-y-6">
-          <ForecastChart />
           
           {/* Search & Filter Bar */}
           <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
@@ -476,20 +485,48 @@ export default function BuyerDashboard() {
                     </span>
                   </div>
 
-                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-700">Assigned Vehicle:</span>
-                      <span className="font-bold text-gray-900">{transporterJob.vehicleNumber}</span>
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="lg:w-1/2 p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-700">Assigned Vehicle:</span>
+                        <span className="font-bold text-gray-900">{transporterJob.vehicleNumber}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-700">Trip Status:</span>
+                        <span className="font-extrabold text-emerald-700">{transporterJob.status}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-700">Stops Progress:</span>
+                        <span>
+                          {transporterJob.pickupStops.filter(s => s.pickedUp).length} of {transporterJob.pickupStops.length} Farms Picked Up
+                        </span>
+                      </div>
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="font-semibold text-gray-700 mb-2">Live GPS Details:</div>
+                        <div className="space-y-1.5 text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Current Speed:</span>
+                            <span className="font-medium">42 km/h</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Last Updated:</span>
+                            <span className="font-medium">Just now</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-700">Trip Status:</span>
-                      <span className="font-extrabold text-emerald-700">{transporterJob.status}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-gray-700">Stops Progress:</span>
-                      <span>
-                        {transporterJob.pickupStops.filter(s => s.pickedUp).length} of {transporterJob.pickupStops.length} Farms Picked Up
-                      </span>
+
+                    <div className="lg:w-1/2 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[200px]">
+                      <img src="/route_map.jpg" alt="Live Route Map" className="w-full h-full object-cover absolute inset-0" />
+                      <div className="absolute top-2 left-2 right-2 flex justify-between gap-2 pointer-events-none">
+                        <span className="bg-black/70 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                          Tracking Active
+                        </span>
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-sm p-2 rounded-lg border border-gray-200 shadow-lg flex justify-between items-center text-[10px] font-bold text-gray-900">
+                        <span className="flex items-center gap-1"><MapPin size={12} className="text-emerald-600"/> Arriving at Central Yard</span>
+                        <span className="text-emerald-700">ETA: 45 mins</span>
+                      </div>
                     </div>
                   </div>
 
@@ -643,6 +680,18 @@ export default function BuyerDashboard() {
                     <span className="text-[10px] text-gray-500 pl-5">Consolidated pooling. Saves money but takes time.</span>
                   </label>
                 </div>
+                {offerDeliveryPref === "POOL" && (
+                  <div className="mt-3">
+                    <label className="block text-gray-700 font-semibold mb-1 text-xs">Latest Acceptable Delivery Date</label>
+                    <input 
+                      type="date"
+                      value={offerDeliveryDeadline}
+                      onChange={(e) => setOfferDeliveryDeadline(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-emerald-500"
+                      required={offerDeliveryPref === "POOL"}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-2">
@@ -663,6 +712,11 @@ export default function BuyerDashboard() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* NETWORK / DIRECTORY TAB */}
+      {activeTab === "network" && (
+        <EMandiNetwork />
       )}
     </div>
   );

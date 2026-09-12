@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useFarmLink } from '../context/FarmLinkContext';
+import { useEMandi } from '../context/EMandiContext';
 import { 
   Send, MapPin, CheckCircle2, AlertCircle, Truck, Sparkles, 
   X, FileText, ShieldCheck, Tractor, Users, RefreshCw
@@ -17,7 +17,7 @@ export default function LiveNegotiationChat() {
     reopenNegotiation,
     setActiveTab, 
     resetDemo 
-  } = useFarmLink();
+  } = useEMandi();
 
   const [inputPrice, setInputPrice] = useState("");
   const [inputMessage, setInputMessage] = useState("");
@@ -166,7 +166,7 @@ export default function LiveNegotiationChat() {
             </span>
             <span className="flex items-center gap-1 text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-2.5 py-0.5 rounded-full">
               <Truck size={11} className="text-emerald-600" />
-              {negotiation.deliveryPreference === "IMMEDIATE" ? "Immediate Dispatch Needed" : "Pool Delivery (Can Wait)"}
+              {negotiation.deliveryPreference === "IMMEDIATE" ? "Immediate Dispatch Needed" : `Pool Delivery (by ${negotiation.deliveryDeadline ? new Date(negotiation.deliveryDeadline).toLocaleDateString() : 'flexible'})`}
             </span>
           </div>
 
@@ -242,61 +242,73 @@ export default function LiveNegotiationChat() {
           </div>
         )}
 
-        {/* Message Bubble History */}
-        {negotiation.history.map((msg, idx) => {
-          const isMe = (isFarmer && msg.role === 'farmer') || (isBuyer && msg.role === 'buyer');
-          const isAcceptMsg = msg.type === "accept";
-          const isRejectMsg = msg.type === "reject";
-          const isInitial = msg.type === "initial";
-          const isCounter = msg.type === "counter";
-          const isOffer = msg.type === "offer";
+        {/* Formal Ledger Timeline */}
+        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent pt-4 pb-4">
+          {negotiation.history.map((msg, idx) => {
+            const isAcceptMsg = msg.type === "accept";
+            const isRejectMsg = msg.type === "reject";
+            const isInitial = msg.type === "initial";
+            const isCounter = msg.type === "counter";
+            const isOffer = msg.type === "offer";
 
-          return (
-            <div key={idx} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-              {/* Sender Name & Role Pill */}
-              <div className="flex items-center gap-1.5 mb-1 px-1 text-[11px] text-gray-500 font-semibold">
-                <span>{msg.sender}</span>
-                <span className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase ${
-                  msg.role === 'farmer' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {msg.role}
-                </span>
-                <span>• {msg.time}</span>
-              </div>
+            let IconC = Users;
+            if (isAcceptMsg) IconC = CheckCircle2;
+            else if (isRejectMsg) IconC = AlertCircle;
+            else if (msg.role === 'farmer') IconC = Tractor;
+            
+            const dotColor = isAcceptMsg ? 'bg-emerald-500' : isRejectMsg ? 'bg-red-500' : (msg.role === 'farmer' ? 'bg-emerald-600' : 'bg-blue-600');
 
-              {/* Speech Bubble */}
-              <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl p-4 shadow-2xs transition-all ${
-                isAcceptMsg 
-                  ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-2xl border border-emerald-500"
-                  : isRejectMsg
-                    ? "bg-red-50 text-red-900 border border-red-200 rounded-2xl"
-                    : isMe 
-                      ? "bg-emerald-700 text-white rounded-tr-xs" 
-                      : "bg-white border border-gray-200 text-gray-800 rounded-tl-xs"
-              }`}>
-                {/* Proposed Price Header */}
-                <div className="flex items-center justify-between gap-3 pb-2 mb-2 border-b border-current/15">
-                  <div className="flex items-center gap-1.5 font-black text-base">
-                    <span className="text-[10px] uppercase tracking-wider opacity-75 font-semibold">
-                      {isInitial ? "Listed Base Price:" : isCounter ? "Counter-Offer:" : isOffer ? "Offer Placed:" : "Agreed Price:"}
-                    </span>
-                    <span>₹{msg.price}/{negotiation.unit}</span>
+            return (
+              <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                {/* Timeline dot */}
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm ${dotColor} text-white absolute left-0 md:left-1/2 md:-translate-x-1/2 z-10`}>
+                  <IconC size={16} />
+                </div>
+                
+                {/* Card */}
+                <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border ${isAcceptMsg ? 'border-emerald-200 shadow-emerald-100' : isRejectMsg ? 'border-red-200 shadow-red-100' : 'border-gray-200'} shadow-sm ml-14 md:ml-0 hover:shadow-md transition-shadow relative`}>
+                  {/* Small arrow pointing to center line on MD screens */}
+                  <div className={`hidden md:block absolute top-5 w-3 h-3 bg-white border-t border-r ${isAcceptMsg ? 'border-emerald-200' : isRejectMsg ? 'border-red-200' : 'border-gray-200'} transform group-odd:rotate-45 group-odd:-left-1.5 group-even:-rotate-135 group-even:-right-1.5`}></div>
+                  
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900 text-sm">{msg.sender}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider ${
+                        msg.role === 'farmer' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {msg.role}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-semibold text-gray-400">{msg.time}</span>
                   </div>
-                  <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                    isMe ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
-                  }`}>
-                    ₹{(msg.price * negotiation.quantity).toLocaleString()} Lot
-                  </span>
-                </div>
-
-                {/* Message Text */}
-                <div className="text-xs sm:text-sm leading-relaxed font-medium">
-                  {msg.message}
+                  
+                  <div className={`flex items-center justify-between gap-3 pb-3 mb-3 border-b ${isAcceptMsg ? 'border-emerald-100' : isRejectMsg ? 'border-red-100' : 'border-gray-100'}`}>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">
+                        {isInitial ? "Initial Listing" : isCounter ? "Counter-Bid" : isOffer ? "Offer Placed" : isAcceptMsg ? "Deal Finalized" : "Deal Declined"}
+                      </span>
+                      <span className={`font-black text-xl tracking-tight ${isAcceptMsg ? 'text-emerald-600' : isRejectMsg ? 'text-red-600' : 'text-gray-900'}`}>
+                        ₹{msg.price}<span className="text-sm font-semibold text-gray-500 ml-0.5">/{negotiation.unit}</span>
+                      </span>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-0.5">Total Value</span>
+                      <span className={`font-black px-2.5 py-1 rounded-lg text-xs ${isAcceptMsg ? 'bg-emerald-50 text-emerald-700' : isRejectMsg ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                        ₹{(msg.price * negotiation.quantity).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {msg.message && (
+                    <div className={`text-xs font-medium leading-relaxed p-3 rounded-lg border ${isAcceptMsg ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' : isRejectMsg ? 'bg-red-50/50 border-red-100 text-red-800' : 'bg-gray-50 border-gray-100 text-gray-600'}`}>
+                      "{msg.message}"
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* 4. Bottom Decision & Action Panel */}
@@ -399,10 +411,10 @@ export default function LiveNegotiationChat() {
             </div>
 
             {/* OPTION 2: GIVE ANOTHER OFFER (COUNTER-OFFER) */}
-            <div className="md:col-span-7 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-wider text-gray-600 font-extrabold">
-                  Option 2: Give Another Counter-Offer
+            <div className="md:col-span-7 bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] uppercase tracking-wider text-gray-600 font-extrabold flex items-center gap-1.5">
+                  <RefreshCw size={12} className="text-gray-400" /> Option 2: Submit Counter-Bid
                 </span>
                 
                 {/* Quick Increment Chips */}
@@ -412,23 +424,23 @@ export default function LiveNegotiationChat() {
                       <button
                         type="button"
                         onClick={() => setInputPrice(String((negotiation.currentOffer || 25) + 1))}
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors cursor-pointer"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer"
                       >
                         +₹1 (₹{(negotiation.currentOffer || 25) + 1})
                       </button>
                       <button
                         type="button"
                         onClick={() => setInputPrice(String((negotiation.currentOffer || 25) + 2))}
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors cursor-pointer"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer"
                       >
                         +₹2 (₹{(negotiation.currentOffer || 25) + 2})
                       </button>
                       <button
                         type="button"
                         onClick={() => setInputPrice(String(negotiation.askingPrice))}
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors cursor-pointer"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
-                        Asking (₹{negotiation.askingPrice})
+                        Base Asking (₹{negotiation.askingPrice})
                       </button>
                     </>
                   ) : (
@@ -436,14 +448,14 @@ export default function LiveNegotiationChat() {
                       <button
                         type="button"
                         onClick={() => setInputPrice(String(Math.max(1, (negotiation.currentOffer || 25) - 1)))}
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors cursor-pointer"
                       >
                         -₹1 (₹{Math.max(1, (negotiation.currentOffer || 25) - 1)})
                       </button>
                       <button
                         type="button"
                         onClick={() => setInputPrice(String((negotiation.currentOffer || 25) + 1))}
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors cursor-pointer"
+                        className="text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors cursor-pointer"
                       >
                         +₹1 (₹{(negotiation.currentOffer || 25) + 1})
                       </button>
@@ -452,38 +464,42 @@ export default function LiveNegotiationChat() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative w-full sm:w-40 shrink-0">
-                  <span className="absolute left-3 top-2.5 text-gray-500 font-bold text-sm">₹</span>
-                  <input 
-                    type="number" 
-                    placeholder="Price"
-                    value={inputPrice}
-                    onChange={(e) => setInputPrice(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-black text-gray-900"
-                  />
-                  <span className="absolute right-3 top-2.5 text-[11px] text-gray-400 font-medium">/{negotiation.unit}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div className="sm:col-span-4 relative">
+                  <label className="block text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Proposed Rate</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-500 font-bold text-sm">₹</span>
+                    <input 
+                      type="number" 
+                      placeholder="Price"
+                      value={inputPrice}
+                      onChange={(e) => setInputPrice(e.target.value)}
+                      className="w-full pl-8 pr-8 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-black text-gray-900 transition-shadow"
+                    />
+                    <span className="absolute right-3 top-2 text-[10px] text-gray-400 font-medium">/{negotiation.unit}</span>
+                  </div>
                 </div>
 
-                <div className="flex-1">
-                  <input 
-                    type="text" 
-                    placeholder="Reason or note (e.g. Best price for Grade-A)..."
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendCounter()}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
+                <div className="sm:col-span-8 relative">
+                  <label className="block text-[9px] uppercase tracking-wider text-gray-500 font-bold mb-1">Formal Note (Optional)</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Best and final offer for Grade-A..."
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSendCounter()}
+                      className="w-full px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow"
+                    />
+                    <button 
+                      onClick={handleSendCounter}
+                      disabled={!inputPrice || Number(inputPrice) <= 0}
+                      className="bg-gray-900 hover:bg-black disabled:opacity-50 text-white font-bold rounded-lg px-4 py-1.5 text-xs flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-sm"
+                    >
+                      Submit
+                    </button>
+                  </div>
                 </div>
-
-                <button 
-                  onClick={handleSendCounter}
-                  disabled={!inputPrice || Number(inputPrice) <= 0}
-                  className="bg-gray-900 hover:bg-black disabled:opacity-50 text-white font-bold rounded-xl px-5 py-2 text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                >
-                  <Send size={14} />
-                  <span>Send Counter</span>
-                </button>
               </div>
             </div>
           </div>
@@ -651,7 +667,7 @@ export default function LiveNegotiationChat() {
             {/* Modal Header */}
             <div className="p-3 bg-gray-100 border-b border-gray-200 flex items-center justify-between shrink-0">
               <div className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                <FileText size={16} /> FarmLink Digital Smart Contract Invoice
+                <FileText size={16} /> e-Mandi Digital Smart Contract Invoice
               </div>
               <button onClick={() => setShowInvoiceModal(false)} className="text-gray-500 hover:text-gray-800 cursor-pointer">
                 <X size={20} />
@@ -669,7 +685,7 @@ export default function LiveNegotiationChat() {
                 {/* Header */}
                 <div className="flex justify-between items-start border-b-2 border-emerald-800 pb-4">
                   <div>
-                    <h1 className="text-2xl font-black text-emerald-800 tracking-tighter">FarmLink</h1>
+                    <h1 className="text-2xl font-black text-emerald-800 tracking-tighter">e-Mandi</h1>
                     <p className="text-gray-500">Digital Smart Contract Receipt</p>
                   </div>
                   <div className="text-right">
@@ -736,8 +752,8 @@ export default function LiveNegotiationChat() {
 
                 {/* Footer Notes */}
                 <div className="mt-8 pt-4 border-t border-gray-200 text-[9px] text-gray-500 space-y-1">
-                  <p><strong>Delivery Preference:</strong> {negotiation.deliveryPreference === "IMMEDIATE" ? "Immediate Dispatch" : "Consolidated Pool"}</p>
-                  <p><strong>Legal Disclaimer:</strong> This is a legally binding contract generated via FarmLink Escrow. Both parties are obligated to fulfill this transaction under the Agricultural Produce Trade Act.</p>
+                  <p><strong>Delivery Preference:</strong> {negotiation.deliveryPreference === "IMMEDIATE" ? "Immediate Dispatch" : `Consolidated Pool (Deadline: ${negotiation.deliveryDeadline ? new Date(negotiation.deliveryDeadline).toLocaleDateString() : 'Flexible'})`}</p>
+                  <p><strong>Legal Disclaimer:</strong> This is a legally binding contract generated via e-Mandi Escrow. Both parties are obligated to fulfill this transaction under the Agricultural Produce Trade Act.</p>
                 </div>
               </div>
             </div>

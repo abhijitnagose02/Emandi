@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useFarmLink } from '../context/FarmLinkContext';
+import { useEMandi } from '../context/EMandiContext';
 import { Sparkles, ChevronDown, Check, ArrowRight, Tractor, Users, Truck } from './Icons';
 
 export default function HeroDemoGuide() {
-  const { currentUser, switchRole, negotiation, order, transporterJob, acceptOffer, chooseDeliveryMethod, acceptTransportJob, confirmPickupStop, confirmDeliveryAtDrop, acceptDeliveryByBuyer, resetDemo } = useFarmLink();
+  const { currentUser, switchRole, negotiation, order, transporterJob, acceptOffer, chooseDeliveryMethod, acceptTransportJob, confirmPickupStop, confirmDeliveryAtDrop, acceptDeliveryByBuyer, resetDemo } = useEMandi();
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Compute current demo progress

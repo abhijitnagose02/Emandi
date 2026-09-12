@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import LiveNegotiationChat from '../LiveNegotiationChat';
-import { useFarmLink } from '../../context/FarmLinkContext';
+import FarmerTransport from './FarmerTransport';
+import AIWeatherForecast from './AIWeatherForecast';
+import EMandiNetwork from '../profile/EMandiNetwork';
+import { useEMandi } from '../../context/EMandiContext';
 import FarmerDashboardOverview from './FarmerDashboardOverview';
 import { 
   Tractor, Plus, DollarSign, Package, Clock, MapPin, 
@@ -13,6 +16,7 @@ export default function FarmerDashboard() {
     currentUser, 
     activeTab, 
     setActiveTab, 
+    activeProfile,
     listings, 
     createListing, 
     negotiation, 
@@ -21,7 +25,7 @@ export default function FarmerDashboard() {
     order, 
     transporterJob, 
     confirmPickupStop 
-  } = useFarmLink();
+  } = useEMandi();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCrop, setNewCrop] = useState("Red Onion (लाल कांदा)");
@@ -36,6 +40,31 @@ export default function FarmerDashboard() {
   const [counterPriceInput, setCounterPriceInput] = useState("26");
   const [counterNoteInput, setCounterNoteInput] = useState("");
 
+  const [searchCrop, setSearchCrop] = useState("Red Onion (लाल कांदा)");
+  const [showCropDropdown, setShowCropDropdown] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState("https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80");
+
+  const MAJOR_CROPS = [
+    "Red Onion (लाल कांदा)",
+    "White Onion (पांढरा कांदा)",
+    "Potato (बटाटा)",
+    "Tomato (टोमॅटो)",
+    "Green Chilli (हिरवी मिरची)",
+    "Wheat (गहू)",
+    "Rice/Paddy (तांदूळ)",
+    "Cotton (कापूस)",
+    "Soybean (सोयाबीन)",
+    "Turmeric (हळद)",
+    "Ginger (आले)",
+    "Garlic (लसूण)",
+    "Sugarcane (ऊस)",
+    "Pomegranate (डाळिंब)",
+    "Grapes (द्राक्षे)",
+    "Mango (आंबा)"
+  ];
+  
+  const filteredCrops = MAJOR_CROPS.filter(c => c.toLowerCase().includes(searchCrop.toLowerCase()));
+
   const handleCreateSubmit = (e) => {
     e.preventDefault();
     createListing({
@@ -47,7 +76,7 @@ export default function FarmerDashboard() {
       pickupLocation: newLocation,
       harvestDate: newHarvestDate,
       description: newDescription,
-      image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80"
+      image: photoPreview
     });
     setShowCreateModal(false);
     setActiveTab("listings");
@@ -63,7 +92,7 @@ export default function FarmerDashboard() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      {activeTab !== 'dashboard' && (
+      {activeTab === 'listings' && (
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-green-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -187,12 +216,6 @@ export default function FarmerDashboard() {
                       <span className="text-gray-400 block text-[10px]">HARVEST DATE</span>
                       <span className="font-medium text-gray-800">{item.harvestDate}</span>
                     </div>
-                    <button
-                      onClick={() => setActiveTab("negotiations")}
-                      className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold rounded-lg text-xs cursor-pointer"
-                    >
-                      View Offers
-                    </button>
                   </div>
                 </div>
               </div>
@@ -267,6 +290,20 @@ export default function FarmerDashboard() {
                   </div>
                 </div>
 
+                {/* Arrange Transport Button */}
+                <div className="mb-6 flex justify-between items-center bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                  <div>
+                    <h4 className="font-bold text-sm text-emerald-900">Need to dispatch this order?</h4>
+                    <p className="text-xs text-emerald-700">Find a shared truck to lower your logistics cost.</p>
+                  </div>
+                  <button 
+                    onClick={() => setActiveTab("transport")}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold cursor-pointer transition-colors shadow-sm"
+                  >
+                    Arrange Transport
+                  </button>
+                </div>
+
                 {/* Transporter Details Card */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
                   <div className="flex items-center justify-between">
@@ -316,6 +353,11 @@ export default function FarmerDashboard() {
             </div>
           )}
         </div>
+      )}
+
+      {/* TRANSPORT TAB */}
+      {activeTab === "transport" && (
+        <FarmerTransport />
       )}
 
       {/* SETTLEMENTS TAB */}
@@ -412,16 +454,64 @@ export default function FarmerDashboard() {
             </div>
 
             <form onSubmit={handleCreateSubmit} className="space-y-4 mt-4 text-xs">
-              <div>
+              <div className="relative">
                 <label className="block font-semibold text-gray-700 mb-1">Crop Name & Variety</label>
                 <input
                   type="text"
-                  value={newCrop}
-                  onChange={(e) => setNewCrop(e.target.value)}
-                  placeholder="e.g. Red Onion (Nashik Red)"
+                  value={searchCrop}
+                  onChange={(e) => {
+                    setSearchCrop(e.target.value);
+                    setNewCrop(e.target.value);
+                    setShowCropDropdown(true);
+                  }}
+                  onFocus={() => setShowCropDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowCropDropdown(false), 200)}
+                  placeholder="Search or enter crop name..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs text-gray-900 focus:ring-2 focus:ring-emerald-500"
                   required
                 />
+                {showCropDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-40 overflow-y-auto">
+                    {filteredCrops.length > 0 ? filteredCrops.map(crop => (
+                      <div 
+                        key={crop}
+                        className="px-3 py-2 hover:bg-emerald-50 text-xs text-gray-800 cursor-pointer"
+                        onClick={() => {
+                          setSearchCrop(crop);
+                          setNewCrop(crop);
+                          setShowCropDropdown(false);
+                        }}
+                      >
+                        {crop}
+                      </div>
+                    )) : (
+                      <div className="px-3 py-2 text-xs text-gray-500">No match found. Type to add custom crop.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Produce Photo</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0">
+                    <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const url = URL.createObjectURL(e.target.files[0]);
+                          setPhotoPreview(url);
+                        }
+                      }}
+                      className="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" 
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1">Upload a clear photo of the harvested crop.</p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -515,6 +605,11 @@ export default function FarmerDashboard() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* NETWORK / DIRECTORY TAB */}
+      {activeTab === "network" && (
+        <EMandiNetwork />
       )}
     </div>
   );

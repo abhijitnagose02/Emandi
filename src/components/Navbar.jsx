@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
-import { useFarmLink } from '../context/FarmLinkContext';
+import { useEMandi } from '../context/EMandiContext';
 import { 
   Tractor, Users, Truck, Bell, LogOut, ChevronDown, 
   MapPin, ShieldCheck, CheckCircle2, MessageSquare, AlertCircle
 } from './Icons';
 
 export default function Navbar() {
-  const { currentUser, switchRole, activeTab, setActiveTab, notifications, onLogout } = useFarmLink();
+  const { currentUser, switchRole, activeTab, setActiveTab, notifications, onLogout, MOCK_PROFILES, setShowSettings } = useEMandi();
   const [showNotifs, setShowNotifs] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+  const myProfile = MOCK_PROFILES?.find(p => p.role === currentUser.role);
 
   const roleNavigation = {
     Farmer: [
       { id: "dashboard", label: "Overview" },
       { id: "listings", label: "Add & Manage Produce" },
-      { id: "negotiations", label: "Active Deals" }
+      { id: "negotiations", label: "Active Deals" },
+      { id: "transport", label: "Arrange Transport" }
     ],
     Buyer: [
+      { id: "dashboard", label: "Overview" },
       { id: "marketplace", label: "Marketplace" },
       { id: "negotiations", label: "Active Deals" },
       { id: "orders", label: "Track Purchases" }
@@ -51,15 +54,13 @@ export default function Navbar() {
           {/* Brand & Logo */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab(navItems[0].id)}>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-green-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-                🌾
-              </div>
+              <img src="/logo.jpg" alt="e-mandi Logo" className="w-12 h-12 rounded-full object-cover shadow-sm border border-emerald-100" />
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-xl tracking-tight text-emerald-800">E-MANDI</span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">FarmLink</span>
+                  <span className="font-extrabold text-xl tracking-tight text-emerald-800">e-mandi</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">e-Mandi</span>
                 </div>
-                <p className="text-[11px] text-gray-500 hidden sm:block">Direct Produce Marketplace & Shared Logistics</p>
+                <p className="text-[11px] text-gray-500 hidden sm:block">Connecting Farmers to Better Markets</p>
               </div>
             </div>
           </div>
@@ -132,6 +133,17 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            {/* My Profile Button */}
+            {myProfile && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="w-8 h-8 rounded-full border-2 border-emerald-100 overflow-hidden hover:border-emerald-500 transition-colors cursor-pointer"
+                title="View Settings & Profile"
+              >
+                <img src={myProfile.photo} alt="My Profile" className="w-full h-full object-cover" />
+              </button>
+            )}
 
             {/* Notification Bell */}
             <div className="relative">

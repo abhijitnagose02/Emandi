@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Sparkles, DollarSign, Package, ArrowRight, ShieldCheck, Users } from '../Icons';
+import { Sparkles, DollarSign, Package, ShieldCheck, Search } from '../Icons';
 import ForecastChart from '../ForecastChart';
-import AIWeatherForecast from './AIWeatherForecast';
+import AIWeatherForecast from '../farmer/AIWeatherForecast';
 
-export default function FarmerDashboardOverview({ setActiveTab, setShowCreateModal }) {
+export default function BuyerDashboardOverview({ setActiveTab }) {
   const [marketTab, setMarketTab] = useState("gainers");
   const [marketType, setMarketType] = useState("spot");
 
@@ -46,7 +46,7 @@ export default function FarmerDashboardOverview({ setActiveTab, setShowCreateMod
                   <div className="text-5xl font-black text-emerald-500">82</div>
                 </div>
                 <button 
-                  onClick={() => setActiveTab("negotiations")}
+                  onClick={() => setActiveTab("marketplace")}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm cursor-pointer"
                 >
                   Open Market

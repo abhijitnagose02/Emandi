@@ -40,7 +40,7 @@ export default function ForecastChart() {
   const labels = getLabels();
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm w-full">
+    <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-2 text-gray-900">
           <ArrowRight size={18} className="transform -rotate-45 text-emerald-600" />
@@ -76,7 +76,7 @@ export default function ForecastChart() {
       </div>
       
       {/* Mock Chart Area */}
-      <div className="relative h-48 w-full mb-4 border-l border-b border-gray-200 mt-6">
+      <div className="relative h-36 w-full mb-4 border-l border-b border-gray-200 mt-6">
         {/* Y Axis Labels */}
         <div className="absolute -left-8 bottom-0 text-[10px] text-gray-400">{currentData.min}</div>
         <div className="absolute -left-8 bottom-1/4 text-[10px] text-gray-400">{Math.round(currentData.min + (currentData.max - currentData.min) * 0.25)}</div>

@@ -92,13 +92,13 @@ export default function LoginPage({ onLogin }) {
         {/* Header Branding */}
         <div className="flex flex-col items-center mb-6">
           <img
-            src="https://static.vecteezy.com/system/resources/thumbnails/031/325/040/small/beautiful-view-of-a-tea-field-plantation-vineyard-farm-or-strawberry-garden-in-the-green-hills-at-sunrise-concept-by-ai-generated-free-photo.jpg"
-            alt="AgriSure Logo"
-            className="w-20 h-20 rounded-full mb-3 object-cover shadow-sm"
+            src="/logo.jpg"
+            alt="e-mandi Logo"
+            className="w-24 h-24 rounded-full mb-3 object-cover shadow-md border-2 border-emerald-100"
           />
-          <h1 className="text-2xl font-bold text-primary">E-MANDI</h1>
-          <p className="text-text-secondary text-center mt-1 text-sm">
-            Hedging for Price Risk Management
+          <h1 className="text-3xl font-extrabold text-primary tracking-tight">e-mandi</h1>
+          <p className="text-text-secondary text-center mt-1 text-sm font-medium">
+            Connecting Farmers to Better Markets
           </p>
         </div>
 

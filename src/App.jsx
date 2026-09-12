@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import LoginPage from './components/LoginPage';
-import { FarmLinkProvider, useFarmLink } from './context/FarmLinkContext';
+import { EMandiProvider, useEMandi } from './context/EMandiContext';
 import Navbar from './components/Navbar';
 import Chatbot from './components/Chatbot';
 import FarmerDashboard from './components/farmer/FarmerDashboard';
 import BuyerDashboard from './components/buyer/BuyerDashboard';
 import TransporterDashboard from './components/transporter/TransporterDashboard';
+import ProfileView from './components/profile/ProfileView';
+import MyProfileSettings from './components/profile/MyProfileSettings';
 
 function MainMarketplaceApp() {
-  const { currentUser } = useFarmLink();
+  const { currentUser, activeProfile } = useEMandi();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col text-slate-800 antialiased selection:bg-emerald-500 selection:text-white pb-20">
@@ -25,6 +27,12 @@ function MainMarketplaceApp() {
 
       {/* Floating Role-Aware Smart Assistant */}
       <Chatbot />
+
+      {/* GLOBAL PROFILE OVERLAY */}
+      <ProfileView />
+
+      {/* GLOBAL SETTINGS OVERLAY */}
+      <MyProfileSettings />
     </div>
   );
 }
@@ -45,8 +53,8 @@ export default function App() {
   }
 
   return (
-    <FarmLinkProvider initialUser={user} onLogout={handleLogout}>
+    <EMandiProvider initialUser={user} onLogout={handleLogout}>
       <MainMarketplaceApp />
-    </FarmLinkProvider>
+    </EMandiProvider>
   );
 }
