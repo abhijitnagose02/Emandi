@@ -186,7 +186,10 @@ export default function BuyerDashboard() {
 
       {/* DASHBOARD OVERVIEW TAB */}
       {activeTab === "dashboard" && (
-        <BuyerDashboardOverview setActiveTab={setActiveTab} />
+        <BuyerDashboardOverview 
+          setActiveTab={setActiveTab} 
+          setSelectedPurchaseId={setSelectedPurchaseId}
+        />
       )}
 
       {/* MARKETPLACE TAB */}
@@ -441,7 +444,7 @@ export default function BuyerDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-gray-700">Stops Progress:</span>
                         <span>
-                          {transporterJob.pickupStops.filter(s => s.pickedUp).length} of {transporterJob.pickupStops.length} Farms Picked Up
+                          {transporterJob?.pickupStops?.filter(s => s.pickedUp).length || 0} of {transporterJob?.pickupStops?.length || 0} Farms Picked Up
                         </span>
                       </div>
                       <div className="pt-2 border-t border-gray-200">
@@ -506,7 +509,7 @@ export default function BuyerDashboard() {
                         onClick={acceptDeliveryByBuyer}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-md transition-colors whitespace-nowrap"
                       >
-                        ✓ Inspect & Accept Delivery
+                        ✓ Inspect and Confirm
                       </button>
                     </div>
                   )}

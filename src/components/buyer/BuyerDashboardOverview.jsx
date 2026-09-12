@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
+import { useEMandi } from '../../context/EMandiContext';
 import { Sparkles, DollarSign, Package, ShieldCheck, Search } from '../Icons';
 import ForecastChart from '../ForecastChart';
 import AIWeatherForecast from '../farmer/AIWeatherForecast';
 
-export default function BuyerDashboardOverview({ setActiveTab }) {
+export default function BuyerDashboardOverview({ setActiveTab, setSelectedPurchaseId }) {
+  const { order } = useEMandi();
   const [marketTab, setMarketTab] = useState("gainers");
   const [marketType, setMarketType] = useState("spot");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in zoom-in-[0.98] duration-300">
+      {/* Dynamic Alerts Section */}
+      {order && order.status !== "COMPLETED" && (
+      <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 className="text-emerald-900 font-bold text-lg">Active Order Tracking</h3>
+          <p className="text-emerald-700 text-sm mt-1">Your order is in transit or awaiting delivery acceptance.</p>
+        </div>
+        <button 
+          onClick={() => {
+            if (setSelectedPurchaseId) setSelectedPurchaseId(order.orderId);
+            setActiveTab("orders");
+          }}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition-colors whitespace-nowrap shadow-sm cursor-pointer"
+        >
+          Track Live GPS
+        </button>
+      </div>
+      )}
       {/* Ticker */}
       <div className="bg-emerald-600 text-white py-2 px-4 rounded-xl overflow-hidden flex items-center relative shadow-sm">
         <div className="bg-emerald-700 px-3 py-1 rounded text-xs font-bold mr-4 z-10 whitespace-nowrap flex items-center gap-1.5 shrink-0">

@@ -501,7 +501,37 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     deliveryProofUploaded: false
   });
 
-  // Global toasts / notifications
+  const INITIAL_PAST_ORDERS = [
+    {
+      orderId: "ORD-942",
+      quantity: 2000,
+      unit: "kg",
+      crop: "Wheat",
+      agreedPrice: 22,
+      totalProduceValue: 44000,
+      farmer: "Ramesh Patil",
+      pickupLocation: "Nashik Farm C",
+      buyer: currentUser?.name || "Buyer",
+      dropLocation: currentUser?.location || "Warehouse",
+      status: "COMPLETED",
+      deliveryMethod: "IMMEDIATE",
+      transportDetails: {
+        tripId: "TR-IMM-942",
+        status: "COMPLETED",
+        payout: 750,
+        transporterName: "Speedy Logistics",
+        vehicleNumber: "MH 15 AB 1234",
+        pickupStops: [
+          { stopIndex: 1, location: "Nashik Farm C", produce: "2000 kg Wheat", pickedUp: true, time: "2 hours ago" }
+        ],
+        finalDrop: "Warehouse"
+      }
+    }
+  ];
+
+  const [pastOrders, setPastOrders] = useLocalStorageState('emandi_pastOrders', INITIAL_PAST_ORDERS);
+
+  // Global notifications
   const [notifications, setNotifications] = useLocalStorageState('emandi_notifications', [
     { id: 1, title: "Price Offer Received", message: "FreshDirect offered ₹25/kg for 500kg Onion.", time: "10m ago", read: false, role: "Farmer" },
     { id: 2, title: "Transport Pool Open", message: "Pool TP-104 has 2 compatible orders to Nagpur.", time: "25m ago", read: false, role: "Buyer" }
@@ -908,7 +938,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     if (order) {
       setOrder(prev => ({
         ...prev,
-        status: "DELIVERED"
+        status: "AWAITING_INSPECTION"
       }));
     }
 
