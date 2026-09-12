@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LiveNegotiationChat from '../LiveNegotiationChat';
 import BuyerDashboardOverview from './BuyerDashboardOverview';
 import EMandiNetwork from '../profile/EMandiNetwork';
@@ -8,6 +8,43 @@ import {
   Clock, ArrowRight, CheckCircle2, AlertCircle, MessageSquare, 
   Truck, ShieldCheck, X, Sparkles, Layers, Zap
 } from '../Icons';
+
+const LiveScanningGraph = () => {
+  const [bars, setBars] = useState(Array(24).fill(20));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBars(prev => prev.map(() => Math.floor(Math.random() * 80) + 10));
+    }, 300);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="w-full flex flex-col items-center mt-6 pt-4 border-t border-gray-200">
+      <div className="flex items-end justify-center gap-1.5 h-16 w-full px-4">
+        {bars.map((height, i) => (
+          <div 
+            key={i} 
+            className="w-2 rounded-t-sm transition-all duration-300 ease-out"
+            style={{ 
+              height: `${height}%`,
+              backgroundColor: height > 60 ? '#10b981' : height > 30 ? '#34d399' : '#a7f3d0'
+            }}
+          ></div>
+        ))}
+      </div>
+      <div className="mt-4 flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 shadow-sm">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+        </span>
+        <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-widest">
+          Live: Polling Local Transporters
+        </span>
+      </div>
+    </div>
+  );
+};
 
 export default function BuyerDashboard() {
   const { 
@@ -42,6 +79,28 @@ export default function BuyerDashboard() {
   // Negotiation timeline counter input
   const [buyerCounterInput, setBuyerCounterInput] = useState("25");
   const [buyerCounterNote, setBuyerCounterNote] = useState("Fair compromise. Let's lock this order.");
+
+  // Purchase Tracking State
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
+  
+  const mockPastOrder = {
+    orderId: "ORD-942",
+    quantity: 2000,
+    unit: "kg",
+    crop: "Wheat",
+    agreedPrice: 22,
+    totalProduceValue: 44000,
+    farmer: "Ramesh Patil",
+    pickupLocation: "Nashik Farm C",
+    buyer: currentUser?.name || "Buyer",
+    dropLocation: currentUser?.location || "Warehouse",
+    status: "COMPLETED",
+    deliveryMethod: "IMMEDIATE"
+  };
+
+  const allPurchases = order ? [order, mockPastOrder] : [mockPastOrder];
+  const activePurchase = allPurchases.find(p => p.orderId === selectedPurchaseId);
+
 
   const filteredListings = listings.filter((item) => {
     const matchesSearch = item.crop.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -273,8 +332,49 @@ export default function BuyerDashboard() {
             <p className="text-xs text-gray-500">Compare Immediate vs Consolidated Transport and track real-time delivery</p>
           </div>
 
-          {order ? (
+          {!selectedPurchaseId ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allPurchases.filter(p => p !== null).map(p => (
+                <div 
+                  key={p.orderId} 
+                  onClick={() => setSelectedPurchaseId(p.orderId)}
+                  className="bg-white p-5 rounded-2xl border border-gray-200 cursor-pointer hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                        ORDER #{p.orderId}
+                      </span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded ${p.status === 'COMPLETED' ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-emerald-800'}`}>
+                        {p.status}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-extrabold text-gray-900 mb-1">
+                      {p.quantity} {p.unit} {p.crop}
+                    </h3>
+                    <p className="text-sm text-gray-500 flex items-center gap-1"><MapPin size={14}/> From: {p.farmer}</p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-emerald-600 font-bold">₹{p.totalProduceValue.toLocaleString()}</span>
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                      Track Purchase <ArrowRight size={14} />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : activePurchase ? (
             <div className="space-y-6">
+              <button 
+                onClick={() => setSelectedPurchaseId(null)}
+                className="text-sm text-gray-500 hover:text-emerald-700 flex items-center gap-1 font-semibold bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm w-fit transition-colors cursor-pointer"
+              >
+                ← Back to All Purchases
+              </button>
+              {(() => {
+                const order = activePurchase;
+                return (
+                  <div className="space-y-6">
               {/* Order Summary Card */}
               <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-2">
@@ -312,165 +412,7 @@ export default function BuyerDashboard() {
                 </div>
               </div>
 
-              {/* TWO DELIVERY OPTIONS SECTION */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Select Delivery Method</h3>
-                    <p className="text-xs text-gray-500">Choose dedicated immediate dispatch or pooled shared transport</p>
-                  </div>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Decision Support Active
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* OPTION 1: IMMEDIATE DELIVERY */}
-                  <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
-                    order.deliveryMethod === "IMMEDIATE"
-                      ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
-                      : "border-gray-200 hover:border-gray-300 bg-white"
-                  }`}>
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                            <Zap size={18} />
-                          </div>
-                          <h4 className="font-extrabold text-base text-gray-900">Option 1: Immediate Delivery</h4>
-                        </div>
-                        <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
-                          Dedicated Vehicle
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-gray-600 mt-2">
-                        Immediate dedicated transport will be arranged. Dispatches within 3-4 hours directly from farm gate to your warehouse.
-                      </p>
-
-                      <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 space-y-1.5 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Dedicated Transport Cost:</span>
-                          <span className="font-semibold text-gray-800">₹1,000</span>
-                        </div>
-                        <div className="flex justify-between items-center py-2 text-xs font-bold text-gray-800 border-t border-gray-100">
-                          <span>Delivery Requirement:</span>
-                          <span>{order.deliveryMethod === "IMMEDIATE" ? "Immediate Dispatch" : "Consolidated Pool"}</span>
-                        </div>
-                        <div className="flex justify-between pt-1 border-t border-gray-100 text-sm font-black text-gray-900">
-                          <span>Payable Transport Share:</span>
-                          <span className="text-emerald-600">₹750</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => chooseDeliveryMethod("IMMEDIATE")}
-                      className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
-                        order.deliveryMethod === "IMMEDIATE"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      {order.deliveryMethod === "IMMEDIATE" ? "✓ Immediate Delivery Selected" : "Select Immediate Delivery (₹750)"}
-                    </button>
-                  </div>
-
-                  {/* OPTION 2: CONSOLIDATED DELIVERY (RECOMMENDED) */}
-                  <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
-                    order.deliveryMethod === "CONSOLIDATED"
-                      ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
-                      : "border-emerald-200 bg-emerald-50/20 hover:border-emerald-300"
-                  }`}>
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                            <Layers size={18} />
-                          </div>
-                          <h4 className="font-extrabold text-base text-gray-900">Option 2: Consolidated Delivery</h4>
-                        </div>
-                        <span className="text-xs font-bold px-2 py-0.5 bg-emerald-600 text-white rounded-full flex items-center gap-1">
-                          <Sparkles size={12} /> RECOMMENDED
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-gray-600 mt-2">
-                        Shares route with compatible farm orders heading to Nagpur Central Yard. Saves money, reduces empty runs.
-                      </p>
-
-                      <div className="mt-4 p-3 bg-white rounded-xl border border-emerald-200 space-y-1.5 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Transport Pool:</span>
-                          <span className="font-bold text-emerald-700">#TP-104 (Nagpur Corridor)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Matched Orders:</span>
-                          <span className="font-semibold text-gray-800">3 Orders (Total: 1,500 kg)</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Vehicle Assigned:</span>
-                          <span className="font-semibold text-gray-800">Eicher 2.5T Capacity</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Total Pool Freight:</span>
-                          <span className="font-semibold text-gray-800">₹2,000 (Split 3 ways)</span>
-                        </div>
-                        <div className="flex justify-between pt-1 border-t border-emerald-100 text-sm font-black text-emerald-800">
-                          <span>Your Transparent Share:</span>
-                          <span className="text-emerald-700">₹800 (Saves ₹200 vs Dedicated!)</span>
-                        </div>
-                      </div>
-
-                      {/* Decision Support Badges */}
-                      <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-                        <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Same destination (Nagpur)</span>
-                        <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Nearby Katol route</span>
-                        <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Capacity available (1.5T/2.5T)</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => chooseDeliveryMethod("CONSOLIDATED")}
-                      className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
-                        order.deliveryMethod === "CONSOLIDATED"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                      }`}
-                    >
-                      {order.deliveryMethod === "CONSOLIDATED" ? "✓ Consolidated Delivery Active (₹800)" : "Select Consolidated Delivery (₹800)"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* DETAILED TRANSPORT POOL BREAKDOWN (When Consolidated is picked) */}
-                {order.deliveryMethod === "CONSOLIDATED" && (
-                  <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-gray-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Truck className="text-emerald-700" size={18} />
-                        <h4 className="font-bold text-sm text-gray-900">Transport Pool #{transportPool.id} — Transparent Cost Split</h4>
-                      </div>
-                      <span className="text-xs text-gray-500 font-medium">Total Load: 1,500 kg / 2,000 kg Capacity</span>
-                    </div>
-
-                    <div className="space-y-2 text-xs">
-                      {transportPool.orders.map((po, idx) => (
-                        <div key={idx} className="p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div>
-                            <span className="font-bold text-gray-900">{po.pickupStop}</span>
-                            <span className="text-gray-500 block text-[11px]">{po.farmer} • {po.quantity} kg {po.crop}</span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-[11px] text-gray-400 block">Base Share + Route Adj.</span>
-                            <span className="font-extrabold text-emerald-700">₹{po.totalShare}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* LIVE TRIP & DELIVERY TRACKING */}
               {order.deliveryMethod && (
@@ -516,18 +458,40 @@ export default function BuyerDashboard() {
                       </div>
                     </div>
 
-                    <div className="lg:w-1/2 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[200px]">
-                      <img src="/route_map.jpg" alt="Live Route Map" className="w-full h-full object-cover absolute inset-0" />
-                      <div className="absolute top-2 left-2 right-2 flex justify-between gap-2 pointer-events-none">
-                        <span className="bg-black/70 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                          Tracking Active
-                        </span>
+                    {transporterJob.status === "AVAILABLE" ? (
+                      <div className="lg:w-1/2 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[200px]">
+                        <iframe 
+                          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d119066.41709462615!2d78.97960305101675!3d21.161085934371497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd4c0a5a31faf13%3A0x19b37d06d0bb3e2b!2sNagpur%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1692186523933!5m2!1sen!2sin" 
+                          className="w-full h-full absolute inset-0 border-0 grayscale opacity-80" 
+                          allowFullScreen="" 
+                          loading="lazy" 
+                          referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                        <div className="absolute inset-0 bg-white/20 pointer-events-none"></div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-emerald-100 flex items-center gap-3 whitespace-nowrap z-10">
+                          <div className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                          </div>
+                          <span className="text-emerald-900 font-bold text-xs uppercase tracking-wider">
+                            Live: Polling Local Transporters
+                          </span>
+                        </div>
                       </div>
-                      <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-sm p-2 rounded-lg border border-gray-200 shadow-lg flex justify-between items-center text-[10px] font-bold text-gray-900">
-                        <span className="flex items-center gap-1"><MapPin size={12} className="text-emerald-600"/> Arriving at Central Yard</span>
-                        <span className="text-emerald-700">ETA: 45 mins</span>
+                    ) : (
+                      <div className="lg:w-1/2 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[200px]">
+                        <img src="/route_map.jpg" alt="Live Route Map" className="w-full h-full object-cover absolute inset-0" />
+                        <div className="absolute top-2 left-2 right-2 flex justify-between gap-2 pointer-events-none">
+                          <span className="bg-black/70 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                            Tracking Active
+                          </span>
+                        </div>
+                        <div className="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-sm p-2 rounded-lg border border-gray-200 shadow-lg flex justify-between items-center text-[10px] font-bold text-gray-900">
+                          <span className="flex items-center gap-1"><MapPin size={12} className="text-emerald-600"/> Arriving at Central Yard</span>
+                          <span className="text-emerald-700">ETA: 45 mins</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Buyer Delivery Acceptance */}
@@ -535,7 +499,7 @@ export default function BuyerDashboard() {
                     <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
                       <div>
                         <div className="font-bold text-emerald-900 text-sm">Produce Arrived at Central Wholesale Yard!</div>
-                        <p className="text-xs text-emerald-700 mt-0.5">Please inspect the 500 kg Red Onion lot and release escrow settlement.</p>
+                        <p className="text-xs text-emerald-700 mt-0.5">Please inspect the 500 boxes Alphonso Mango lot and release escrow settlement.</p>
                       </div>
                       <button
                         onClick={acceptDeliveryByBuyer}
@@ -554,12 +518,11 @@ export default function BuyerDashboard() {
                   )}
                 </div>
               )}
+                  </div>
+                );
+              })()}
             </div>
-          ) : (
-            <div className="p-8 text-center bg-white rounded-2xl border border-gray-200">
-              <p className="text-gray-500 text-sm">No confirmed orders. Finalize a price in the Negotiation tab to initiate delivery.</p>
-            </div>
-          )}
+          ) : null}
         </div>
       )}
 

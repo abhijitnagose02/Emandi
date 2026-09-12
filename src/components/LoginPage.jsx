@@ -58,6 +58,7 @@ export default function LoginPage({ onLogin }) {
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES[0]);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedState, setSelectedState] = useState(STATES[0]);
+  const [isStateOpen, setIsStateOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -140,7 +141,7 @@ export default function LoginPage({ onLogin }) {
                 </button>
 
                 {isLangOpen && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  <ul className="absolute top-full left-0 bottom-auto z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto origin-top">
                     {LANGUAGES.map((lang) => {
                       const [main, sub] = lang.split(" ");
                       const isSelected = lang === selectedLanguage;
@@ -168,18 +169,42 @@ export default function LoginPage({ onLogin }) {
               <label htmlFor="state" className="block text-sm font-medium text-text-secondary mb-1">
                 Select State
               </label>
-              <select
-                id="state"
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-white text-text-primary cursor-pointer"
-              >
-                {STATES.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <button
+                  id="state"
+                  type="button"
+                  onClick={() => setIsStateOpen(!isStateOpen)}
+                  className="w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary flex justify-between items-center cursor-pointer text-text-primary"
+                >
+                  <span>{selectedState}</span>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${isStateOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isStateOpen && (
+                  <ul className="absolute top-full left-0 bottom-auto z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto origin-top">
+                    {STATES.map((state) => {
+                      const isSelected = state === selectedState;
+                      return (
+                        <li
+                          key={state}
+                          onClick={() => {
+                            setSelectedState(state);
+                            setIsStateOpen(false);
+                          }}
+                          className={`px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between transition-colors ${isSelected ? "bg-secondary text-white hover:bg-emerald-600" : "text-text-primary"
+                            }`}
+                        >
+                          <span>{state}</span>
+                          {isSelected && <Check size={16} />}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
 
             {/* Select Role */}
@@ -242,7 +267,8 @@ export default function LoginPage({ onLogin }) {
         {step === 2 && (
           <form onSubmit={handleVerifyOtp}>
             <p className="text-center text-sm text-text-secondary mb-4">
-              Enter the 4-digit OTP sent to +91 {phone}.
+              Enter the 4-digit OTP sent to +91 {phone}.<br/>
+              <span className="text-xs text-gray-500 font-medium">(use demo otp as 1234)</span>
             </p>
             <div className="mb-4">
               <label htmlFor="otp-input" className="block text-sm font-medium text-text-secondary mb-1">

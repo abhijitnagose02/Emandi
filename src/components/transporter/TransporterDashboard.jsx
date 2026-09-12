@@ -151,7 +151,7 @@ export default function TransporterDashboard() {
                     Nagpur Agri Corridor: 3 Pickups → Central Wholesale Market
                   </h3>
                   <p className="text-xs text-gray-300 mt-0.5">
-                    Payload: <strong className="text-white">1,500 kg Red Onion</strong> (Utilizes 75% of your 2,000 kg capacity)
+                    Payload: <strong className="text-white">1,500 boxes Alphonso Mango</strong> (Utilizes 75% of your 2,000 kg capacity)
                   </p>
                 </div>
 

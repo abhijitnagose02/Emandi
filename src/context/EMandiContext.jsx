@@ -4,99 +4,135 @@ const EMandiContext = createContext();
 
 export const INITIAL_LISTINGS = [
   {
-    id: "L-102",
+    id: "L-201",
+    crop: "Premium Alphonso Mangoes (हापूस आंबा)",
+    variety: "Ratnagiri Hapus",
+    quantity: 500,
+    unit: "boxes",
+    grade: "Export Quality Grade A",
+    expectedPrice: 850,
+    farmerName: "Suresh Patil",
+    farmerPhone: "9876543210",
+    pickupLocation: "Katol Farm A, Nagpur, Maharashtra",
+    harvestDate: "Just Harvested",
+    status: "Available",
+    image: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600&auto=format&fit=crop&q=80",
+    moisture: "Fresh",
+    description: "Sun-ripened, chemical-free Ratnagiri Alphonso mangoes. Perfect for export.",
+    createdAt: "Today"
+  },
+  {
+    id: "L-202",
+    crop: "Organic Ginger (आले)",
+    variety: "Mahim",
+    quantity: 1200,
+    unit: "kg",
+    grade: "Washed & Sun-Dried",
+    expectedPrice: 120,
+    farmerName: "Rameshwar Rao",
+    farmerPhone: "9823114455",
+    pickupLocation: "Wardha Spice Hub, Maharashtra",
+    harvestDate: "5 days ago",
+    status: "Available",
+    image: "https://images.unsplash.com/photo-1595123550441-d377e017ea3e?w=600&auto=format&fit=crop&q=80",
+    moisture: "Cured",
+    description: "High quality aromatic ginger, washed and sun-dried for long shelf life.",
+    createdAt: "Yesterday"
+  },
+  {
+    id: "L-203",
+    crop: "Fresh Green Chilli (हिरवी मिरची)",
+    variety: "G4 Premium",
+    quantity: 300,
+    unit: "kg",
+    grade: "Grade A",
+    expectedPrice: 45,
+    farmerName: "Govind Patil",
+    farmerPhone: "9877223355",
+    pickupLocation: "Bhandara Vegetable Belt, Maharashtra",
+    harvestDate: "Ready now",
+    status: "Available",
+    image: "https://images.unsplash.com/photo-1587049352847-8d4e8a10f138?w=600&auto=format&fit=crop&q=80",
+    moisture: "Fresh",
+    description: "Spicy and crisp G4 green chillies. Picked directly from the farm today.",
+    createdAt: "Just now"
+  },
+  {
+    id: "L-204",
+    crop: "Raw Turmeric (हळद)",
+    variety: "Salem",
+    quantity: 800,
+    unit: "kg",
+    grade: "Grade A",
+    expectedPrice: 110,
+    farmerName: "Anil More",
+    farmerPhone: "9823115566",
+    pickupLocation: "Sangli Turmeric Market, Maharashtra",
+    harvestDate: "2 days ago",
+    status: "Available",
+    image: "https://images.unsplash.com/photo-1615486171434-c5a3a1f24d35?w=600&auto=format&fit=crop&q=80",
+    moisture: "Normal",
+    description: "High curcumin content, washed and naturally dried turmeric fingers.",
+    createdAt: "Yesterday"
+  },
+  {
+    id: "L-205",
+    crop: "Raw Cotton (कापूस)",
+    variety: "BT Cotton",
+    quantity: 2000,
+    unit: "kg",
+    grade: "Long Staple",
+    expectedPrice: 75,
+    farmerName: "Baldev Singh",
+    farmerPhone: "9811223344",
+    pickupLocation: "Yavatmal Cotton Belt, Maharashtra",
+    harvestDate: "Ready now",
+    status: "Available",
+    image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=600&auto=format&fit=crop&q=80",
+    moisture: "Dry",
+    description: "Premium long-staple cotton, hand-picked and completely dry.",
+    createdAt: "Today"
+  },
+  {
+    id: "L-206",
     crop: "Sharbati Wheat (गेहूं)",
     variety: "MP Sharbati",
-    quantity: 1200,
+    quantity: 5000,
     unit: "kg",
     grade: "Grade A+",
     expectedPrice: 32,
-    farmerName: "Rameshwar Rao",
-    farmerPhone: "9823114455",
-    pickupLocation: "Sehore Mandi Route, Madhya Pradesh",
-    harvestDate: "10 Sep 2026",
+    farmerName: "Vijay Deshmukh",
+    farmerPhone: "9988776655",
+    pickupLocation: "Amravati Grain Market, Maharashtra",
+    harvestDate: "Last week",
     status: "Available",
     image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&auto=format&fit=crop&q=80",
     moisture: "9%",
     description: "Golden heavy grains, pest-free storage, high protein content.",
-    createdAt: "Yesterday"
-  },
-  {
-    id: "L-103",
-    crop: "Yellow Soybean (सोयाबीन)",
-    variety: "JS-335",
-    quantity: 800,
-    unit: "kg",
-    grade: "Grade B+",
-    expectedPrice: 46,
-    farmerName: "Gajanan Deshmukh",
-    farmerPhone: "9877221144",
-    pickupLocation: "Wardha Agri Hub, Maharashtra",
-    harvestDate: "18 Sep 2026",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&auto=format&fit=crop&q=80",
-    moisture: "11%",
-    description: "High oil yield seeds, cleaned and graded for mill processing.",
-    createdAt: "2 days ago"
-  },
-  {
-    id: "L-104",
-    crop: "Hybrid Tomatoes (टमाटर)",
-    variety: "Abhinav 105",
-    quantity: 400,
-    unit: "kg",
-    grade: "Grade A",
-    expectedPrice: 22,
-    farmerName: "Pandurang Koli",
-    farmerPhone: "9855332211",
-    pickupLocation: "Pimpalgaon, Nashik, Maharashtra",
-    harvestDate: "Today",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80",
-    moisture: "Fresh",
-    description: "Hand-picked early morning harvest. Firm skin, ideal for transport.",
-    createdAt: "Today, 06:15 AM"
-  },
-  {
-    id: "L-105",
-    crop: "Organic Potatoes (आलू)",
-    variety: "Jyoti",
-    quantity: 1500,
-    unit: "kg",
-    grade: "Grade A",
-    expectedPrice: 18,
-    farmerName: "Baldev Singh",
-    farmerPhone: "9811223344",
-    pickupLocation: "Sanwer Belt, Indore, Madhya Pradesh",
-    harvestDate: "12 Sep 2026",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=80",
-    moisture: "Cured",
-    description: "No chemical sprays, cold-chain ready, uniform medium-large size.",
     createdAt: "3 days ago"
   }
 ];
 
 export const INITIAL_NEGOTIATION = {
   id: "NEG-101",
-  listingId: "L-101",
-  crop: "Red Onion (लाल कांदा)",
+  listingId: "L-201",
+  crop: "Premium Alphonso Mangoes (हापूस आंबा)",
   quantity: 500,
-  unit: "kg",
+  unit: "boxes",
   buyerName: "FreshDirect Procurement",
   buyerLocation: "Central Wholesale Yard, Nagpur",
   farmerName: "Suresh Patil",
   farmerLocation: "Katol Farm A, Nagpur",
-  askingPrice: 28,
-  currentOffer: 25,
+  askingPrice: 850,
+  currentOffer: 800,
   lastOfferBy: "buyer", // "buyer" | "farmer" - who made the last offer/counter
   deliveryPreference: "IMMEDIATE", // IMMEDIATE or POOL
   status: "IN_PROGRESS", // "OPEN", "IN_PROGRESS", "ACCEPTED", "REJECTED"
   history: [
-    { sender: "Farmer", role: "farmer", price: 28, message: "Freshly harvested Grade-A onions, asking ₹28/kg.", time: "10:00 AM", type: "initial" },
-    { sender: "Buyer", role: "buyer", price: 24, message: "Interested in full 500kg lot. We offer ₹24/kg for prompt pickup.", time: "10:15 AM", type: "offer" },
-    { sender: "Farmer", role: "farmer", price: 26, message: "Transport quality is exceptional. Can meet at ₹26/kg.", time: "10:30 AM", type: "counter" },
-    { sender: "Buyer", role: "buyer", price: 25, message: "Fair middle ground at ₹25/kg. We will finalize immediately.", time: "10:45 AM", type: "counter" }
+    { sender: "Farmer", role: "farmer", price: 850, message: "Export quality Alphonso, asking ₹850/box.", time: "10:00 AM", type: "initial" },
+    { sender: "Buyer", role: "buyer", price: 750, message: "Interested in full lot. We offer ₹750/box.", time: "10:15 AM", type: "offer" },
+    { sender: "Farmer", role: "farmer", price: 820, message: "Quality is exceptional. Can meet at ₹820/box.", time: "10:30 AM", type: "counter" },
+    { sender: "Buyer", role: "buyer", price: 800, message: "Fair middle ground at ₹800/box. We will finalize immediately.", time: "10:45 AM", type: "counter" }
   ]
 };
 
@@ -205,7 +241,7 @@ export const MOCK_PROFILES = [
       { author: "Anil More", rating: 5, text: "Clear requirements and fair negotiation." }
     ],
     recentPurchases: [
-      { product: "Red Onion", farmer: "Suresh Patil", quantity: "500 KG", price: "₹25/kg", status: "Delivered" },
+      { product: "Alphonso Mango", farmer: "Suresh Patil", quantity: "500 boxes", price: "₹800/box", status: "Delivered" },
       { product: "Tomato", farmer: "Ramesh Patil", quantity: "200 KG", price: "₹22/kg", status: "In Transit" }
     ]
   },
@@ -254,8 +290,62 @@ export const MOCK_PROFILES = [
         status: "Accepting Farmers"
       }
     ]
+  },
+  {
+    id: "P-N1",
+    role: "NGO",
+    name: "Samarth Krishi NGO",
+    photo: "https://images.unsplash.com/photo-1552581234-26160f608093?w=600&auto=format&fit=crop&q=80",
+    location: "Amravati Division",
+    isVerified: true,
+    rating: 4.9,
+    reviewsCount: 156,
+    experience: "12 Years",
+    about: "Helping local farmer collectives achieve fair pricing through bulk negotiation and logistics.",
+    stats: {
+      farmersAssisted: 2450,
+      activeClusters: 18,
+      produceSold: "850 Tons"
+    },
+    verification: {
+      identity: true,
+      ngoRegistration: true
+    },
+    trustScore: 98,
+    reviews: []
   }
 ];
+
+function useLocalStorageState(key, defaultValue) {
+  const [state, setState] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+      return defaultValue;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(state));
+    } catch (error) {
+      console.error(error);
+    }
+  }, [key, state]);
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === key && e.newValue) {
+        setState(JSON.parse(e.newValue));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [key]);
+
+  return [state, setState];
+}
 
 export function EMandiProvider({ children, initialUser, onLogout }) {
   const getDefaultName = (role) => {
@@ -331,15 +421,15 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
     }
   });
 
-  const [listings, setListings] = useState(INITIAL_LISTINGS);
-  const [negotiation, setNegotiation] = useState(INITIAL_NEGOTIATION);
-  const [order, setOrder] = useState(null);
-  const [sharedTrips, setSharedTrips] = useState(INITIAL_SHARED_TRIPS);
-  const [mySharedTrip, setMySharedTrip] = useState(null);
-  const [dedicatedRequests, setDedicatedRequests] = useState([]);
+  const [listings, setListings] = useLocalStorageState('emandi_listings_v5', INITIAL_LISTINGS);
+  const [negotiation, setNegotiation] = useLocalStorageState('emandi_negotiation_v5', INITIAL_NEGOTIATION);
+  const [order, setOrder] = useLocalStorageState('emandi_order_v5', null);
+  const [sharedTrips, setSharedTrips] = useLocalStorageState('emandi_sharedTrips_v5', INITIAL_SHARED_TRIPS);
+  const [mySharedTrip, setMySharedTrip] = useLocalStorageState('emandi_mySharedTrip_v5', null);
+  const [dedicatedRequests, setDedicatedRequests] = useLocalStorageState('emandi_dedicatedRequests_v5', []);
   
   // Transport pool state for consolidation
-  const [transportPool, setTransportPool] = useState({
+  const [transportPool, setTransportPool] = useLocalStorageState('emandi_transportPool_v5', {
     id: "TP-104",
     destination: "Nagpur Central Wholesale Market",
     maxCapacity: 2000,
@@ -384,16 +474,16 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   });
 
   // Transporter state
-  const [transporterJob, setTransporterJob] = useState({
+  const [transporterJob, setTransporterJob] = useLocalStorageState('emandi_transporterJob', {
     tripId: "TR-104",
     transporterName: "Ramesh Logix (Ramesh Transports)",
     vehicleNumber: "MH-31-AG-4091",
     status: "AVAILABLE", // AVAILABLE, ASSIGNED, PICKING_UP, IN_TRANSIT, DELIVERED, COMPLETED
     payout: 2000,
     pickupStops: [
-      { stopIndex: 1, location: "Katol Farm A (Suresh Patil)", produce: "500 kg Red Onion", pickedUp: false, time: null },
-      { stopIndex: 2, location: "Kalmeshwar Farm B (Namdeo Rao)", produce: "400 kg Red Onion", pickedUp: false, time: null },
-      { stopIndex: 3, location: "Saoner Farm C (Vasantrao Shinde)", produce: "600 kg Red Onion", pickedUp: false, time: null }
+      { stopIndex: 1, location: "Katol Farm A (Suresh Patil)", produce: "500 boxes Alphonso Mango", pickedUp: false, time: null },
+      { stopIndex: 2, location: "Kalmeshwar Farm B (Namdeo Rao)", produce: "400 boxes Alphonso Mango", pickedUp: false, time: null },
+      { stopIndex: 3, location: "Saoner Farm C (Vasantrao Shinde)", produce: "600 boxes Alphonso Mango", pickedUp: false, time: null }
     ],
     finalDrop: "Nagpur Central Wholesale Market (FreshDirect)",
     pickupProofUploaded: false,
@@ -401,7 +491,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   });
 
   // Global toasts / notifications
-  const [notifications, setNotifications] = useState([
+  const [notifications, setNotifications] = useLocalStorageState('emandi_notifications', [
     { id: 1, title: "Price Offer Received", message: "FreshDirect offered ₹25/kg for 500kg Onion.", time: "10m ago", read: false, role: "Farmer" },
     { id: 2, title: "Transport Pool Open", message: "Pool TP-104 has 2 compatible orders to Nagpur.", time: "25m ago", read: false, role: "Buyer" }
   ]);
@@ -824,9 +914,9 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
       status: "AVAILABLE",
       payout: 2000,
       pickupStops: [
-        { stopIndex: 1, location: "Katol Farm A (Suresh Patil)", produce: "500 kg Red Onion", pickedUp: false, time: null },
-        { stopIndex: 2, location: "Kalmeshwar Farm B (Namdeo Rao)", produce: "400 kg Red Onion", pickedUp: false, time: null },
-        { stopIndex: 3, location: "Saoner Farm C (Vasantrao Shinde)", produce: "600 kg Red Onion", pickedUp: false, time: null }
+        { stopIndex: 1, location: "Katol Farm A (Suresh Patil)", produce: "500 boxes Alphonso Mango", pickedUp: false, time: null },
+        { stopIndex: 2, location: "Kalmeshwar Farm B (Namdeo Rao)", produce: "400 boxes Alphonso Mango", pickedUp: false, time: null },
+        { stopIndex: 3, location: "Saoner Farm C (Vasantrao Shinde)", produce: "600 boxes Alphonso Mango", pickedUp: false, time: null }
       ],
       finalDrop: "Nagpur Central Wholesale Market (FreshDirect)",
       pickupProofUploaded: false,

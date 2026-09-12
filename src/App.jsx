@@ -6,6 +6,7 @@ import Chatbot from './components/Chatbot';
 import FarmerDashboard from './components/farmer/FarmerDashboard';
 import BuyerDashboard from './components/buyer/BuyerDashboard';
 import TransporterDashboard from './components/transporter/TransporterDashboard';
+import NgoDashboard from './components/ngo/NgoDashboard';
 import ProfileView from './components/profile/ProfileView';
 import MyProfileSettings from './components/profile/MyProfileSettings';
 import LearningCenter from './components/education/LearningCenter';
@@ -23,7 +24,7 @@ function MainMarketplaceApp() {
         {currentUser.role === 'Farmer' && <FarmerDashboard />}
         {currentUser.role === 'Buyer' && <BuyerDashboard />}
         {currentUser.role === 'Transporter' && <TransporterDashboard />}
-        {currentUser.role === 'NGO' && <FarmerDashboard />}
+        {currentUser.role === 'NGO' && <NgoDashboard />}
       </main>
 
       {/* Floating Role-Aware Smart Assistant */}

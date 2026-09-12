@@ -81,9 +81,9 @@ export default function BuyerDashboardOverview({ setActiveTab }) {
                     </div>
                   </div>
                   <div className="flex justify-between items-center px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <span className="font-semibold text-gray-800 text-sm">Red Onion</span>
+                    <span className="font-semibold text-gray-800 text-sm">Wheat</span>
                     <div className="text-right">
-                      <div className="font-bold text-emerald-600 text-sm">₹2,800 <span className="text-[10px]">↗2.4%</span></div>
+                      <div className="font-bold text-emerald-600 text-sm">₹3,200 <span className="text-[10px]">↗2.4%</span></div>
                     </div>
                   </div>
                 </div>

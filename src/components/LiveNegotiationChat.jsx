@@ -679,7 +679,7 @@ export default function LiveNegotiationChat() {
               <div className="bg-white w-full max-w-md shadow-lg p-8 space-y-6 text-emerald-800 font-sans text-[11px] relative">
                 {/* Watermark */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none overflow-hidden">
-                  <span className="text-8xl font-black rotate-[-45deg] whitespace-nowrap">FARMLINK</span>
+                  <span className="text-8xl font-black rotate-[-45deg] whitespace-nowrap">E-MANDI</span>
                 </div>
 
                 {/* Header */}

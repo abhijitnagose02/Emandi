@@ -10,7 +10,7 @@ import HelpButton from '../education/HelpButton';
 import { 
   Tractor, Plus, DollarSign, Package, Clock, MapPin, 
   ArrowRight, CheckCircle2, AlertCircle, MessageSquare, 
-  Truck, ShieldCheck, X, Sparkles
+  Truck, ShieldCheck, X, Sparkles, Zap, Layers
 } from '../Icons';
 
 export default function FarmerDashboard() {
@@ -26,31 +26,31 @@ export default function FarmerDashboard() {
     acceptOffer, 
     order, 
     transporterJob, 
-    confirmPickupStop 
+    confirmPickupStop,
+    chooseDeliveryMethod,
+    transportPool
   } = useEMandi();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newCrop, setNewCrop] = useState("Red Onion (लाल कांदा)");
-  const [newQuantity, setNewQuantity] = useState("500");
+  const [newCrop, setNewCrop] = useState("Potato (बटाटा)");
+  const [newQuantity, setNewQuantity] = useState("1500");
   const [newGrade, setNewGrade] = useState("Grade A");
-  const [newPrice, setNewPrice] = useState("28");
-  const [newLocation, setNewLocation] = useState("Katol Farm A, Nagpur, Maharashtra");
-  const [newHarvestDate, setNewHarvestDate] = useState("15 Sep 2026");
-  const [newDescription, setNewDescription] = useState("Naturally cured export-quality onions. Firm texture, uniform 55mm+ size.");
+  const [newPrice, setNewPrice] = useState("18");
+  const [newLocation, setNewLocation] = useState("Sanwer Belt, Indore, Madhya Pradesh");
+  const [newHarvestDate, setNewHarvestDate] = useState("12 Sep 2026");
+  const [newDescription, setNewDescription] = useState("No chemical sprays, cold-chain ready, uniform medium-large size.");
 
   // Negotiation input state
   const [counterPriceInput, setCounterPriceInput] = useState("26");
   const [counterNoteInput, setCounterNoteInput] = useState("");
 
-  const [searchCrop, setSearchCrop] = useState("Red Onion (लाल कांदा)");
+  const [searchCrop, setSearchCrop] = useState("Potato (बटाटा)");
   const [showCropDropdown, setShowCropDropdown] = useState(false);
   const [photoPreview, setPhotoPreview] = useState("https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=600&auto=format&fit=crop&q=80");
 
   const MAJOR_CROPS = [
-    "Red Onion (लाल कांदा)",
     "White Onion (पांढरा कांदा)",
     "Potato (बटाटा)",
-    "Tomato (टोमॅटो)",
     "Green Chilli (हिरवी मिरची)",
     "Wheat (गहू)",
     "Rice/Paddy (तांदूळ)",
@@ -296,19 +296,167 @@ export default function FarmerDashboard() {
                   </div>
                 </div>
 
-                {/* Arrange Transport Button */}
-                <div className="mb-6 flex justify-between items-center bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
-                  <div>
-                    <h4 className="font-bold text-sm text-emerald-900">Need to dispatch this order?</h4>
-                    <p className="text-xs text-emerald-700">Find a shared truck to lower your logistics cost.</p>
+                {/* TWO DELIVERY OPTIONS SECTION */}
+                {transporterJob.status === "AVAILABLE" && (
+                  <div className="mb-6 bg-white rounded-2xl border border-gray-200 p-6 shadow-xs mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Select Delivery Method</h3>
+                        <p className="text-xs text-gray-500">Choose dedicated immediate dispatch or pooled shared transport</p>
+                      </div>
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Decision Support Active
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* OPTION 1: IMMEDIATE DELIVERY */}
+                      <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
+                        order.deliveryMethod === "IMMEDIATE"
+                          ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}>
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                                <Zap size={18} />
+                              </div>
+                              <h4 className="font-extrabold text-base text-gray-900">Option 1: Immediate Delivery</h4>
+                            </div>
+                            <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-700 rounded">
+                              Dedicated Vehicle
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-gray-600 mt-2">
+                            Immediate dedicated transport will be arranged. Dispatches within 3-4 hours directly from farm gate to your warehouse.
+                          </p>
+
+                          <div className="mt-4 p-3 bg-white rounded-xl border border-gray-200 space-y-1.5 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Dedicated Transport Cost:</span>
+                              <span className="font-semibold text-gray-800">₹1,000</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 text-xs font-bold text-gray-800 border-t border-gray-100">
+                              <span>Delivery Requirement:</span>
+                              <span>{order.deliveryMethod === "IMMEDIATE" ? "Immediate Dispatch" : "Consolidated Pool"}</span>
+                            </div>
+                            <div className="flex justify-between pt-1 border-t border-gray-100 text-sm font-black text-gray-900">
+                              <span>Payable Transport Share:</span>
+                              <span className="text-emerald-600">₹750</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => chooseDeliveryMethod("IMMEDIATE")}
+                          className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
+                            order.deliveryMethod === "IMMEDIATE"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+                          }`}
+                        >
+                          {order.deliveryMethod === "IMMEDIATE" ? "✓ Immediate Delivery Selected" : "Select Immediate Delivery (₹750)"}
+                        </button>
+                      </div>
+
+                      {/* OPTION 2: CONSOLIDATED DELIVERY (RECOMMENDED) */}
+                      <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between ${
+                        order.deliveryMethod === "CONSOLIDATED"
+                          ? "border-emerald-500 bg-emerald-50/40 ring-2 ring-emerald-400"
+                          : "border-emerald-200 bg-emerald-50/20 hover:border-emerald-300"
+                      }`}>
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                                <Layers size={18} />
+                              </div>
+                              <h4 className="font-extrabold text-base text-gray-900">Option 2: Consolidated Delivery</h4>
+                            </div>
+                            <span className="text-xs font-bold px-2 py-0.5 bg-emerald-600 text-white rounded-full flex items-center gap-1">
+                              <Sparkles size={12} /> RECOMMENDED
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-gray-600 mt-2">
+                            Shares route with compatible farm orders heading to Nagpur Central Yard. Saves money, reduces empty runs.
+                          </p>
+
+                          <div className="mt-4 p-3 bg-white rounded-xl border border-emerald-200 space-y-1.5 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Transport Pool:</span>
+                              <span className="font-bold text-emerald-700">#TP-104 (Nagpur Corridor)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Matched Orders:</span>
+                              <span className="font-semibold text-gray-800">3 Orders (Total: 1,500 kg)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Vehicle Assigned:</span>
+                              <span className="font-semibold text-gray-800">Eicher 2.5T Capacity</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Total Pool Freight:</span>
+                              <span className="font-semibold text-gray-800">₹2,000 (Split 3 ways)</span>
+                            </div>
+                            <div className="flex justify-between pt-1 border-t border-emerald-100 text-sm font-black text-emerald-800">
+                              <span>Your Transparent Share:</span>
+                              <span className="text-emerald-700">₹800 (Saves ₹200 vs Dedicated!)</span>
+                            </div>
+                          </div>
+
+                          {/* Decision Support Badges */}
+                          <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
+                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Same destination (Nagpur)</span>
+                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Nearby Katol route</span>
+                            <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800 font-medium">✓ Capacity available (1.5T/2.5T)</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => chooseDeliveryMethod("CONSOLIDATED")}
+                          className={`mt-4 w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer transition-colors ${
+                            order.deliveryMethod === "CONSOLIDATED"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                          }`}
+                        >
+                          {order.deliveryMethod === "CONSOLIDATED" ? "✓ Consolidated Delivery Active (₹800)" : "Select Consolidated Delivery (₹800)"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* DETAILED TRANSPORT POOL BREAKDOWN (When Consolidated is picked) */}
+                    {order.deliveryMethod === "CONSOLIDATED" && (
+                      <div className="mt-6 p-4 rounded-2xl bg-slate-50 border border-gray-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Truck className="text-emerald-700" size={18} />
+                            <h4 className="font-bold text-sm text-gray-900">Transport Pool #{transportPool.id} — Transparent Cost Split</h4>
+                          </div>
+                          <span className="text-xs text-gray-500 font-medium">Total Load: 1,500 kg / 2,000 kg Capacity</span>
+                        </div>
+
+                        <div className="space-y-2 text-xs">
+                          {transportPool.orders.map((po, idx) => (
+                            <div key={idx} className="p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div>
+                                <span className="font-bold text-gray-900">{po.pickupStop}</span>
+                                <span className="text-gray-500 block text-[11px]">{po.farmer} • {po.quantity} kg {po.crop}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[11px] text-gray-400 block">Base Share + Route Adj.</span>
+                                <span className="font-extrabold text-emerald-700">₹{po.totalShare}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <button 
-                    onClick={() => setActiveTab("transport")}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold cursor-pointer transition-colors shadow-sm"
-                  >
-                    Arrange Transport
-                  </button>
-                </div>
+                )}
 
                 {/* Transporter Details Card */}
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-3">
@@ -381,7 +529,7 @@ export default function FarmerDashboard() {
                 <div className="text-2xl font-extrabold text-emerald-900 mt-1">
                   {order ? `₹${order.totalProduceValue.toLocaleString()}` : "₹12,500"}
                 </div>
-                <span className="text-[11px] text-emerald-700 mt-0.5 block">500 kg Red Onion @ ₹25/kg</span>
+                <span className="text-[11px] text-emerald-700 mt-0.5 block">500 boxes Alphonso Mango @ ₹800/box</span>
               </div>
 
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">

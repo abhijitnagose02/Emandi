@@ -29,7 +29,7 @@ export default function HeroDemoGuide() {
       step: 1,
       title: "List & Discover",
       role: "Farmer / Buyer",
-      desc: "Farmer lists 500kg Red Onion @ ₹28/kg. Buyer discovers in Marketplace.",
+      desc: "Farmer lists 500 boxes Alphonso Mango @ ₹850/box. Buyer discovers in Marketplace.",
       targetRole: "Farmer"
     },
     {
