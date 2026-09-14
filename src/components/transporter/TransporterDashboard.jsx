@@ -35,8 +35,9 @@ export default function TransporterDashboard() {
     platformFare: 4500
   });
 
-  const completedStops = transporterJob.pickupStops.filter(s => s.pickedUp).length;
-  const totalStops = transporterJob.pickupStops.length;
+  const safeStops = transporterJob?.pickupStops || [];
+  const completedStops = safeStops.filter(s => s.pickedUp).length;
+  const totalStops = safeStops.length;
 
   return (
     <div className="space-y-6">
@@ -164,7 +165,7 @@ export default function TransporterDashboard() {
               <div className="p-6 space-y-4">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">Route Waypoints & Pickup Schedule</h4>
                 <div className="space-y-2.5 text-xs">
-                  {transporterJob.pickupStops.map((stop) => (
+                  {(transporterJob?.pickupStops || []).map((stop) => (
                     <div key={stop.stopIndex} className="p-3 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs">
@@ -336,7 +337,7 @@ export default function TransporterDashboard() {
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="lg:w-2/3 space-y-3">
                 <h3 className="font-bold text-base text-gray-900">Farm Gate Loading Sequence</h3>
-                {transporterJob.pickupStops.map((stop) => (
+                {(transporterJob?.pickupStops || []).map((stop) => (
                   <div 
                     key={stop.stopIndex} 
                     className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
@@ -461,10 +462,10 @@ export default function TransporterDashboard() {
                 </span>
               </div>
 
-              {completedStops === totalStops && transporterJob.status !== "DELIVERED" && transporterJob.status !== "COMPLETED" && (
+              {totalStops > 0 && completedStops === totalStops && transporterJob.status !== "DELIVERED" && transporterJob.status !== "COMPLETED" && (
                 <div className="pt-2 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div className="text-xs text-gray-600">
-                    All 3 farms loaded (1,500 kg total). Ready to confirm delivery at Nagpur Yard:
+                    All {totalStops} farm stop(s) loaded. Ready to confirm delivery at destination:
                   </div>
                   <button
                     onClick={confirmDeliveryAtDrop}

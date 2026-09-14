@@ -62,7 +62,8 @@ export default function BuyerDashboard() {
     transportPool, 
     transporterJob, 
     acceptDeliveryByBuyer,
-    deleteListing
+    deleteListing,
+    pastOrders
   } = useEMandi();
 
   // Search & Filter State
@@ -83,6 +84,13 @@ export default function BuyerDashboard() {
 
   // Purchase Tracking State
   const [selectedPurchaseId, setSelectedPurchaseId] = useState(null);
+
+  // Auto-select the active order if there is one that is not completed
+  useEffect(() => {
+    if (order && order.status !== "COMPLETED") {
+      setSelectedPurchaseId(order.orderId);
+    }
+  }, [order?.orderId]);
   
   const mockPastOrder = {
     orderId: "ORD-942",
@@ -99,7 +107,7 @@ export default function BuyerDashboard() {
     deliveryMethod: "IMMEDIATE"
   };
 
-  const allPurchases = order ? [order, mockPastOrder] : [mockPastOrder];
+  const allPurchases = order ? [order, ...(pastOrders || []).filter(p => p.orderId !== order.orderId)] : (pastOrders || [mockPastOrder]);
   const activePurchase = allPurchases.find(p => p.orderId === selectedPurchaseId);
 
 
@@ -418,8 +426,21 @@ export default function BuyerDashboard() {
 
 
 
+              {/* Waiting for Farmer to Select Delivery */}
+              {!order.deliveryMethod && order.status === "ORDER_CONFIRMED" && (
+                <div className="bg-amber-50 rounded-2xl border border-amber-200 p-8 text-center shadow-xs mt-4">
+                  <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center border border-amber-200 shadow-sm mb-4">
+                    <Clock className="text-amber-600 animate-pulse" size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-amber-900 mb-2">Waiting for Farmer to Arrange Transport</h3>
+                  <p className="text-sm text-amber-700 max-w-md mx-auto">
+                    The deal is confirmed! The farmer is currently selecting the best delivery method (Immediate or Consolidated) for this order. You will be notified once transport is arranged.
+                  </p>
+                </div>
+              )}
+
               {/* LIVE TRIP & DELIVERY TRACKING */}
-              {order.deliveryMethod && (
+              {order.deliveryMethod && order.status !== "COMPLETED" && (
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -444,7 +465,7 @@ export default function BuyerDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-gray-700">Stops Progress:</span>
                         <span>
-                          {transporterJob?.pickupStops?.filter(s => s.pickedUp).length || 0} of {transporterJob?.pickupStops?.length || 0} Farms Picked Up
+                          {(transporterJob?.pickupStops || []).filter(s => s.pickedUp).length} of {(transporterJob?.pickupStops || []).length} Farms Picked Up
                         </span>
                       </div>
                       <div className="pt-2 border-t border-gray-200">
@@ -498,28 +519,33 @@ export default function BuyerDashboard() {
                     )}
                   </div>
 
-                  {/* Buyer Delivery Acceptance */}
-                  {transporterJob.status === "DELIVERED" && order.status !== "COMPLETED" && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
-                      <div>
-                        <div className="font-bold text-emerald-900 text-sm">Produce Arrived at Central Wholesale Yard!</div>
-                        <p className="text-xs text-emerald-700 mt-0.5">Please inspect the 500 boxes Alphonso Mango lot and release escrow settlement.</p>
-                      </div>
-                      <button
-                        onClick={acceptDeliveryByBuyer}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-md transition-colors whitespace-nowrap"
-                      >
-                        ✓ Inspect and Confirm
-                      </button>
+                </div>
+              )}
+              
+              {/* Buyer Delivery Acceptance (Moved outside deliveryMethod check so it always shows if awaiting inspection) */}
+              {((transporterJob.status === "DELIVERED" || order.status === "AWAITING_INSPECTION") && order.status !== "COMPLETED") && (
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs mt-4">
+                  <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div>
+                      <div className="font-bold text-emerald-900 text-sm">Produce Arrived at Central Wholesale Yard!</div>
+                      <p className="text-xs text-emerald-700 mt-0.5">Please inspect the {order?.quantity} {order?.unit} {order?.crop} lot and release escrow settlement.</p>
                     </div>
-                  )}
+                    <button
+                      onClick={acceptDeliveryByBuyer}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow-md transition-colors whitespace-nowrap"
+                    >
+                      ✓ Inspect and Confirm
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                  {order.status === "COMPLETED" && (
-                    <div className="p-4 bg-emerald-100 border border-emerald-400 rounded-xl text-emerald-900 font-bold text-xs flex items-center gap-2">
-                      <CheckCircle2 size={20} className="text-emerald-700" />
-                      <span>Delivery Successfully Accepted! Payment settled to Suresh Patil and Ramesh Transports.</span>
-                    </div>
-                  )}
+              {order.status === "COMPLETED" && (
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs mt-4">
+                  <div className="p-4 bg-emerald-100 border border-emerald-400 rounded-xl text-emerald-900 font-bold text-xs flex items-center gap-2">
+                    <CheckCircle2 size={20} className="text-emerald-700" />
+                    <span>Delivery Successfully Accepted! Payment settled to Suresh Patil and Ramesh Transports.</span>
+                  </div>
                 </div>
               )}
                   </div>

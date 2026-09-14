@@ -9,7 +9,8 @@ export default function Navbar() {
   const { currentUser, switchRole, activeTab, setActiveTab, notifications, onLogout, MOCK_PROFILES, setShowSettings, setShowLearningCenter } = useEMandi();
   const [showNotifs, setShowNotifs] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const userNotifications = notifications.filter(n => !n.role || n.role === currentUser.role || n.role === 'All');
+  const unreadCount = userNotifications.filter(n => !n.read).length;
   const myProfile = MOCK_PROFILES?.find(p => p.role === currentUser.role);
 
   const roleNavigation = {
@@ -97,12 +98,12 @@ export default function Navbar() {
               </button>
 
               <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-200 py-3 z-50 text-left opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                  <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
                     <span className="font-bold text-sm text-gray-800">Activity & Alerts</span>
-                    <span className="text-[11px] text-emerald-600 font-semibold">{notifications.length} updates</span>
+                    <span className="text-[11px] text-emerald-600 font-semibold">{userNotifications.length} updates</span>
                   </div>
                   <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
-                    {notifications.map(n => (
+                    {userNotifications.map(n => (
                       <div 
                         key={n.id} 
                         onClick={() => {

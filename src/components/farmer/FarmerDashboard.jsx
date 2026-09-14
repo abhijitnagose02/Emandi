@@ -62,6 +62,7 @@ export default function FarmerDashboard() {
     "Green Chilli (हिरवी मिरची)",
     "Wheat (गहू)",
     "Rice/Paddy (तांदूळ)",
+    "Tomato (टोमॅटो)",
     "Cotton (कापूस)",
     "Soybean (सोयाबीन)",
     "Turmeric (हळद)",
@@ -151,7 +152,7 @@ export default function FarmerDashboard() {
           <div className="bg-emerald-900/40 p-3 rounded-2xl border border-emerald-500/30">
             <span className="text-xs text-emerald-200">Awaiting Pickup</span>
             <div className="text-xl sm:text-2xl font-black text-emerald-200 mt-0.5">
-              {transporterJob.pickupStops[0].pickedUp ? "0" : (order ? "1" : "0")}
+              {(transporterJob?.pickupStops?.[0]?.pickedUp) ? "0" : (order ? "1" : "0")}
             </div>
           </div>
           <div className="bg-emerald-900/40 p-3 rounded-2xl border border-emerald-500/30 col-span-2 sm:col-span-1">
@@ -321,7 +322,7 @@ export default function FarmerDashboard() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           {/* OPTION 1: IMMEDIATE DELIVERY */}
-                          <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between border-gray-200 hover:border-gray-300 bg-white`}>
+                          <div className={`rounded-2xl p-5 border-2 transition-all duration-300 flex flex-col justify-between border-gray-200 hover:border-gray-300 hover:shadow-md hover:-translate-y-1 bg-white cursor-default`}>
                             <div>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -364,7 +365,7 @@ export default function FarmerDashboard() {
                           </div>
 
                           {/* OPTION 2: CONSOLIDATED DELIVERY (RECOMMENDED) */}
-                          <div className={`rounded-2xl p-5 border-2 transition-all flex flex-col justify-between border-emerald-200 bg-emerald-50/20 hover:border-emerald-300`}>
+                          <div className={`rounded-2xl p-5 border-2 transition-all duration-300 flex flex-col justify-between border-emerald-200 bg-emerald-50/20 hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 cursor-default`}>
                             <div>
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
@@ -467,6 +468,14 @@ export default function FarmerDashboard() {
                     </div>
                   </div>
 
+                  </div>
+                )}
+
+                {/* Farmer Payment Settlement Banner */}
+                {order.status === "COMPLETED" && (
+                  <div className="mt-4 p-4 bg-emerald-100 border border-emerald-400 rounded-xl text-emerald-900 font-bold text-xs flex items-center gap-2 shadow-sm">
+                    <CheckCircle2 size={20} className="text-emerald-700" />
+                    <span>Delivery Confirmed by Buyer! Payment has been released from escrow and settled to your account.</span>
                   </div>
                 )}
               </div>

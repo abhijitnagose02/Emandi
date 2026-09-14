@@ -34,47 +34,12 @@ export const INITIAL_LISTINGS = [
     pickupLocation: "Wardha Spice Hub, Maharashtra",
     harvestDate: "5 days ago",
     status: "Available",
-    image: "https://images.unsplash.com/photo-1595123550441-d377e017ea3e?w=600&auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&auto=format&fit=crop&q=80",
     moisture: "Cured",
     description: "High quality aromatic ginger, washed and sun-dried for long shelf life.",
     createdAt: "Yesterday"
   },
-  {
-    id: "L-203",
-    crop: "Fresh Green Chilli (हिरवी मिरची)",
-    variety: "G4 Premium",
-    quantity: 300,
-    unit: "kg",
-    grade: "Grade A",
-    expectedPrice: 45,
-    farmerName: "Govind Patil",
-    farmerPhone: "9877223355",
-    pickupLocation: "Bhandara Vegetable Belt, Maharashtra",
-    harvestDate: "Ready now",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1587049352847-8d4e8a10f138?w=600&auto=format&fit=crop&q=80",
-    moisture: "Fresh",
-    description: "Spicy and crisp G4 green chillies. Picked directly from the farm today.",
-    createdAt: "Just now"
-  },
-  {
-    id: "L-204",
-    crop: "Raw Turmeric (हळद)",
-    variety: "Salem",
-    quantity: 800,
-    unit: "kg",
-    grade: "Grade A",
-    expectedPrice: 110,
-    farmerName: "Anil More",
-    farmerPhone: "9823115566",
-    pickupLocation: "Sangli Turmeric Market, Maharashtra",
-    harvestDate: "2 days ago",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1615486171434-c5a3a1f24d35?w=600&auto=format&fit=crop&q=80",
-    moisture: "Normal",
-    description: "High curcumin content, washed and naturally dried turmeric fingers.",
-    createdAt: "Yesterday"
-  },
+
   {
     id: "L-205",
     crop: "Raw Cotton (कापूस)",
@@ -320,7 +285,12 @@ function useLocalStorageState(key, defaultValue) {
   const [state, setState] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
+      const parsed = item ? JSON.parse(item) : null;
+      if (parsed == null) return defaultValue;
+      if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+        return { ...defaultValue, ...parsed };
+      }
+      return parsed;
     } catch (error) {
       return defaultValue;
     }
@@ -337,7 +307,18 @@ function useLocalStorageState(key, defaultValue) {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === key && e.newValue) {
-        setState(JSON.parse(e.newValue));
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (parsed == null) {
+            setState(defaultValue);
+          } else if (typeof defaultValue === 'object' && defaultValue !== null && !Array.isArray(defaultValue)) {
+            setState({ ...defaultValue, ...parsed });
+          } else {
+            setState(parsed);
+          }
+        } catch(err) {
+          setState(defaultValue);
+        }
       }
     };
     window.addEventListener('storage', handleStorageChange);
@@ -428,11 +409,27 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   const [mySharedTrip, setMySharedTrip] = useLocalStorageState('emandi_mySharedTrip_v5', null);
   const [dedicatedRequests, setDedicatedRequests] = useLocalStorageState('emandi_dedicatedRequests_v5', []);
   
-  // Auto-cleanup bad mock listings
+  // Auto-cleanup bad mock listings and patch broken images
   useEffect(() => {
     setListings(prev => {
-      const valid = prev.filter(l => l.image && (l.image.startsWith('http') || l.image.startsWith('data:')));
-      if (valid.length !== prev.length) {
+      let changed = false;
+      const patched = prev.map(l => {
+        if (l.image === "https://images.unsplash.com/photo-1595123550441-d377e017ea3e?w=600&auto=format&fit=crop&q=80") {
+          changed = true;
+          return { ...l, image: "https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=600&auto=format&fit=crop&q=80" };
+        }
+        return l;
+      });
+
+      // Filter out invalid items and the specifically requested deletions (L-203, L-204)
+      const valid = patched.filter(l => 
+        l.image && 
+        (l.image.startsWith('http') || l.image.startsWith('data:')) &&
+        l.id !== "L-203" && 
+        l.id !== "L-204"
+      );
+      
+      if (valid.length !== prev.length || changed) {
         return valid;
       }
       return prev;
@@ -627,7 +624,7 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
 
   // 2. Buyer makes an offer (Buyer sets price X -> Farmer gets next turn to accept or counter)
   const makeOffer = (listingId, offeredPrice, customNote, deliveryPref = "IMMEDIATE", deliveryDeadline = "") => {
-    const listing = listings.find(l => l.id === listingId) || listings[0];
+    const listing = listings.find(l => String(l.id) === String(listingId)) || listings[0];
     const newNeg = {
       id: `NEG-${Math.floor(100 + Math.random() * 900)}`,
       listingId: listing.id,
@@ -878,7 +875,11 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
         ...prev,
         tripId: "TR-104",
         status: "AVAILABLE",
-        payout: 2000
+        payout: 2000,
+        pickupStops: [
+          { stopIndex: 1, location: order.pickupLocation, produce: `${order.quantity} ${order.unit} ${order.crop}`, pickedUp: false, time: null }
+        ],
+        finalDrop: order.dropLocation
       }));
 
       addNotification("Consolidated Transport Pool TP-104 selected. Waiting for transporter.", "Transporter");
@@ -905,7 +906,11 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   // 8. Confirm Pickup for Stop
   const confirmPickupStop = (stopIndex) => {
     setTransporterJob(prev => {
-      const updatedStops = prev.pickupStops.map(s => {
+      const currentStops = (prev.pickupStops && prev.pickupStops.length > 0) 
+        ? prev.pickupStops 
+        : [{ stopIndex: 1, location: order?.pickupLocation || "Farm Gate", produce: `${order?.quantity || 500} ${order?.unit || 'kg'} ${order?.crop || 'Produce'}`, pickedUp: false, time: null }];
+      
+      const updatedStops = currentStops.map(s => {
         if (s.stopIndex === stopIndex) {
           return { ...s, pickedUp: true, time: "Just now" };
         }
@@ -921,9 +926,9 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
       };
     });
 
-    if (stopIndex === 1 && order) {
+    if (order) {
       setOrder(prev => ({ ...prev, status: "IN_TRANSIT" }));
-      addNotification("Stop 1 (Katol Farm A - Suresh Patil) picked up! In transit to destination.", "Farmer");
+      addNotification(`Farm gate pickup confirmed for ${order.crop}! In transit to destination.`, "Farmer");
     }
   };
 
@@ -948,10 +953,12 @@ export function EMandiProvider({ children, initialUser, onLogout }) {
   // 10. Buyer Accepts Delivery & Settles
   const acceptDeliveryByBuyer = () => {
     if (order) {
-      setOrder(prev => ({
-        ...prev,
+      const completedOrder = {
+        ...order,
         status: "COMPLETED"
-      }));
+      };
+      setOrder(completedOrder);
+      setPastOrders(prev => [completedOrder, ...prev.filter(p => p.orderId !== completedOrder.orderId)]);
     }
 
     setTransporterJob(prev => ({

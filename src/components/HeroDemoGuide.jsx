@@ -10,7 +10,7 @@ export default function HeroDemoGuide() {
   let currentStep = 1;
   if (transporterJob.status === "COMPLETED" || order?.status === "COMPLETED") {
     currentStep = 6;
-  } else if (transporterJob.status === "DELIVERED" || order?.status === "DELIVERED") {
+  } else if (transporterJob.status === "DELIVERED" || order?.status === "DELIVERED" || order?.status === "AWAITING_INSPECTION") {
     currentStep = 5;
   } else if (transporterJob.status === "IN_TRANSIT" || transporterJob.status === "PICKING_UP" || transporterJob.status === "ASSIGNED") {
     currentStep = 4;

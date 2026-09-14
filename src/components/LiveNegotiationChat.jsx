@@ -124,15 +124,6 @@ export default function LiveNegotiationChat() {
                   <span>⏳ Waiting for {turnRole}</span>
                 </span>
               )}
-
-              {/* Quick toggle to simulate other party */}
-              <button
-                onClick={() => switchRole(turnRole)}
-                className="bg-white hover:bg-emerald-100 text-emerald-700 hover:text-emerald-900 px-2.5 py-1 rounded-lg border border-emerald-300 font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-sm"
-                title={`Switch to ${turnRole} to respond to this offer`}
-              >
-                <span>Switch to {turnRole} View ⇄</span>
-              </button>
             </>
           )}
 
@@ -528,20 +519,10 @@ export default function LiveNegotiationChat() {
                 </p>
               </div>
             </div>
-
-            {/* Direct Switch Perspective CTA */}
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => switchRole(turnRole)}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Respond as {turnRole}</span>
-                <span>→</span>
-              </button>
-            </div>
           </div>
         </div>
       )}
+
 
       {/* 5. Terms & Conditions Modal (Required before Final Acceptance) */}
       {showTermsModal && (
